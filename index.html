@@ -3,166 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0d0b0a">
-<title>命理学习 · 五术堂</title>
+<meta name="theme-color" content="#05070f">
+<title>五术堂 · 命理导航</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9775;</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='none' stroke='%23d9b877' stroke-width='5'/><circle cx='50' cy='50' r='10' fill='%23d9b877'/></svg>">
 <style>
   :root{
-    --bg:#0d0b0a;
-    --gold:#c9a75f; --gold-hi:#f0d9a0; --gold-lo:#8f7238;
-    --ink:#efe7d6; --ink-dim:#9c917d;
-    --line:rgba(201,167,95,.28);
-    --glass:rgba(38,32,25,.55);
+    --bg0:#05070f; --bg1:#0a1020;
+    --gold:#d9b877; --gold-hi:#f4e6be; --gold-lo:#9a7d43;
+    --cyan:#8fd3e0; --cyan-dim:#4d7b88;
+    --ink:#e9edf8; --ink-dim:#8a94ac;
+    --line:rgba(217,184,119,.26);
+    --panel:rgba(14,20,36,.55);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{
     min-height:100vh; position:relative; overflow-x:hidden;
     background:
-      radial-gradient(140% 90% at 50% -20%, #241c12 0%, #14100c 46%, var(--bg) 100%);
+      radial-gradient(90% 55% at 22% 12%, rgba(80,120,160,.16), transparent 60%),
+      radial-gradient(80% 55% at 82% 30%, rgba(110,86,160,.14), transparent 60%),
+      radial-gradient(120% 90% at 50% 8%, #101a30 0%, #0a1020 42%, var(--bg0) 100%);
     color:var(--ink);
     font-family:"Noto Serif SC","Songti SC","PingFang SC",serif;
     display:flex; flex-direction:column; align-items:center;
-    padding:calc(env(safe-area-inset-top) + 54px) 22px calc(env(safe-area-inset-bottom) + 40px);
+    padding:calc(env(safe-area-inset-top) + 44px) 22px calc(env(safe-area-inset-bottom) + 42px);
   }
-  /* 八卦环水印 */
-  .ring{
-    position:fixed; top:-18vh; left:50%; width:min(120vw,760px); aspect-ratio:1;
-    transform:translateX(-50%); pointer-events:none; z-index:0;
-    opacity:.10; color:var(--gold);
-    animation:spin 90s linear infinite;
+  /* 星空层 */
+  #stars,#stars2{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  .star{position:absolute; border-radius:50%; background:#dfe8ff;}
+  @keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+  .wrap{position:relative; z-index:2; width:100%; display:flex; flex-direction:column; align-items:center;}
+
+  /* 罗盘主视觉 */
+  .hero{position:relative; width:210px; height:210px; margin:6px 0 6px; opacity:0; animation:fade 1s .1s ease forwards;}
+  .compass{position:absolute; inset:0; color:var(--gold);}
+  .compass.spin{animation:spin 120s linear infinite;}
+  .compass.spin-r{animation:spin 90s linear infinite reverse;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .core{
+    position:absolute; inset:0; display:grid; place-items:center; flex-direction:column;
   }
-  @keyframes spin{to{transform:translateX(-50%) rotate(360deg);}}
-  .wrap{position:relative; z-index:1; width:100%; display:flex; flex-direction:column; align-items:center;}
+  .core .tj{font-size:34px; color:var(--gold-hi); text-shadow:0 0 18px rgba(217,184,119,.6); line-height:1;}
+  .glow{position:absolute; inset:-30% ; border-radius:50%;
+    background:radial-gradient(circle, rgba(217,184,119,.14), transparent 62%); z-index:-1;}
 
   /* 标题 */
-  .head{text-align:center; margin-bottom:42px; opacity:0; animation:rise .9s .05s ease forwards;}
-  .seal{
-    width:66px; height:66px; margin:0 auto 20px; border-radius:50%;
-    display:grid; place-items:center; font-size:34px; color:var(--bg);
-    background:radial-gradient(circle at 35% 30%, var(--gold-hi), var(--gold) 55%, var(--gold-lo));
-    box-shadow:0 0 0 1px rgba(240,217,160,.4), 0 8px 30px rgba(201,167,95,.28), inset 0 -3px 8px rgba(0,0,0,.35);
-  }
+  .head{text-align:center; margin:10px 0 34px; opacity:0; animation:fade 1s .35s ease forwards;}
   h1{
-    font-size:30px; letter-spacing:.42em; font-weight:700; margin:0 0 14px; padding-left:.42em;
-    background:linear-gradient(100deg, var(--gold-lo), var(--gold-hi) 40%, #fff5df 50%, var(--gold-hi) 60%, var(--gold-lo));
+    font-size:33px; letter-spacing:.46em; font-weight:700; margin:0 0 12px; padding-left:.46em;
+    background:linear-gradient(100deg,var(--gold-lo),var(--gold-hi) 42%,#fff8e6 50%,var(--gold-hi) 58%,var(--gold-lo));
     background-size:220% 100%;
     -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-    animation:sheen 6s ease-in-out infinite;
+    animation:sheen 7s ease-in-out infinite;
   }
-  @keyframes sheen{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
-  .sub{
-    display:flex; align-items:center; justify-content:center; gap:14px;
-    font-size:12.5px; letter-spacing:.36em; color:var(--ink-dim); margin:0; padding-left:.36em;
-  }
-  .sub::before,.sub::after{content:""; width:34px; height:1px; background:linear-gradient(90deg,transparent,var(--line),transparent);}
+  @keyframes sheen{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+  .sub{display:flex; align-items:center; justify-content:center; gap:13px;
+    font-size:12px; letter-spacing:.4em; color:var(--cyan); opacity:.85; margin:0; padding-left:.4em;}
+  .sub::before,.sub::after{content:""; width:30px; height:1px; background:linear-gradient(90deg,transparent,var(--cyan-dim),transparent);}
 
   /* 卡片 */
-  .grid{width:100%; max-width:460px; display:flex; flex-direction:column; gap:15px;}
+  .grid{width:100%; max-width:452px; display:flex; flex-direction:column; gap:14px;}
   .card{
-    display:flex; align-items:center; gap:17px; padding:19px 20px;
-    background:var(--glass);
-    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
-    border:1px solid var(--line); border-radius:18px;
+    display:flex; align-items:center; gap:16px; padding:17px 19px;
+    background:var(--panel);
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.07); border-radius:16px;
     color:var(--ink); text-decoration:none; position:relative; overflow:hidden;
-    box-shadow:0 4px 22px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,240,210,.05);
-    opacity:0; transform:translateY(14px);
-    animation:rise .7s ease forwards;
-    transition:transform .18s ease, border-color .25s, box-shadow .25s;
+    box-shadow:0 6px 26px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    opacity:0; transform:translateY(16px); animation:rise .7s ease forwards;
+    transition:transform .2s ease, border-color .25s, box-shadow .25s;
   }
-  .card:nth-child(1){animation-delay:.12s}
-  .card:nth-child(2){animation-delay:.20s}
-  .card:nth-child(3){animation-delay:.28s}
-  .card:nth-child(4){animation-delay:.36s}
-  .card:nth-child(5){animation-delay:.44s}
-  .card:active{transform:scale(.98);}
-  .card:hover{
-    border-color:rgba(240,217,160,.6);
-    box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 0 1px rgba(240,217,160,.15), inset 0 1px 0 rgba(255,240,210,.08);
-    transform:translateY(-2px);
-  }
-  .card::after{ /* 顶部流光 */
-    content:""; position:absolute; inset:0; border-radius:18px; pointer-events:none;
-    background:linear-gradient(120deg,transparent 40%,rgba(240,217,160,.08) 50%,transparent 60%);
-    opacity:0; transition:opacity .3s;
-  }
-  .card:hover::after{opacity:1;}
+  .card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:linear-gradient(var(--cyan),var(--gold)); opacity:.9;}
+  .card:nth-child(1){animation-delay:.5s}.card:nth-child(2){animation-delay:.58s}
+  .card:nth-child(3){animation-delay:.66s}.card:nth-child(4){animation-delay:.74s}
+  .card:nth-child(5){animation-delay:.82s}
+  .card:active{transform:scale(.985);}
+  .card:hover{border-color:rgba(217,184,119,.5);
+    box-shadow:0 12px 38px rgba(0,0,0,.55), 0 0 0 1px rgba(217,184,119,.14);
+    transform:translateY(-2px);}
   .ic{
-    flex:0 0 54px; height:54px; border-radius:50%;
-    display:grid; place-items:center; font-size:26px; font-weight:600;
-    color:var(--gold-hi);
-    background:radial-gradient(circle at 34% 28%, #3a3021, #211a12);
+    flex:0 0 50px; height:50px; border-radius:12px; display:grid; place-items:center;
+    font-size:24px; font-weight:600; color:var(--gold-hi);
+    background:radial-gradient(circle at 32% 26%, #1c2740, #0c1322);
     border:1px solid var(--line);
     box-shadow:inset 0 -3px 8px rgba(0,0,0,.4);
   }
   .txt{flex:1; min-width:0;}
-  .t-main{font-size:18.5px; font-weight:600; letter-spacing:.1em; color:var(--ink);}
-  .t-sub{font-size:12.5px; color:var(--ink-dim); margin-top:4px; letter-spacing:.05em;}
-  .arrow{color:var(--gold); font-size:22px; opacity:.55; flex:0 0 auto; transition:transform .2s,opacity .2s;}
+  .t-main{font-size:18px; font-weight:600; letter-spacing:.1em;}
+  .t-sub{font-size:12px; color:var(--ink-dim); margin-top:4px; letter-spacing:.04em;}
+  .no{font:600 12px/1 "PingFang SC",sans-serif; color:var(--cyan-dim); letter-spacing:.1em; flex:0 0 auto;}
+  .arrow{color:var(--gold); font-size:21px; opacity:.5; flex:0 0 auto; transition:transform .2s,opacity .2s;}
   .card:hover .arrow{opacity:1; transform:translateX(3px);}
 
-  .foot{
-    margin-top:44px; font-size:11px; letter-spacing:.2em; color:rgba(156,145,125,.5); text-align:center;
-    opacity:0; animation:rise .8s .6s ease forwards;
-  }
+  .foot{margin-top:40px; font-size:10.5px; letter-spacing:.24em; color:rgba(138,148,172,.5); text-align:center;
+    opacity:0; animation:fade 1s 1s ease forwards;}
+  @keyframes fade{to{opacity:1;}}
   @keyframes rise{to{opacity:1; transform:none;}}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;} .head,.card,.foot{opacity:1;transform:none;}}
-  @media (min-width:600px){ .grid{max-width:540px;} }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;} .hero,.head,.card,.foot{opacity:1;transform:none;}}
+  @media (min-width:600px){ .grid{max-width:540px;} .hero{width:240px;height:240px;} }
 </style>
 </head>
 <body>
-  <svg class="ring" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1">
-    <circle cx="100" cy="100" r="96"/><circle cx="100" cy="100" r="74"/><circle cx="100" cy="100" r="52"/>
-    <g stroke-width="1.4">
-      <!-- 八卦刻度 -->
-      <g id="tick"><line x1="100" y1="4" x2="100" y2="22"/></g>
-    </g>
-    <g stroke-width="1">
-      <line x1="100" y1="0" x2="100" y2="200"/><line x1="0" y1="100" x2="200" y2="100"/>
-      <line x1="29" y1="29" x2="171" y2="171"/><line x1="171" y1="29" x2="29" y2="171"/>
-    </g>
-  </svg>
+  <div id="stars"></div>
+  <div id="stars2"></div>
 
   <div class="wrap">
+    <div class="hero">
+      <div class="glow"></div>
+      <svg class="compass spin" id="ring-out" viewBox="0 0 200 200" fill="none"></svg>
+      <svg class="compass spin-r" id="ring-in" viewBox="0 0 200 200" fill="none"></svg>
+      <div class="core"><div class="tj">&#9775;</div></div>
+    </div>
+
     <div class="head">
-      <div class="seal">&#9775;</div>
       <h1>五术堂</h1>
-      <p class="sub">命 理 · 择 术 而 入</p>
+      <p class="sub">命 理 · 一 门 五 术</p>
     </div>
 
     <main class="grid">
       <a class="card" href="https://nevergiveup0618.github.io/bazi-game/">
         <div class="ic">卦</div>
-        <div class="txt"><div class="t-main">八字日练</div><div class="t-sub">五模式练习 · 学习计划系统</div></div>
-        <span class="arrow">&#8250;</span>
+        <div class="txt"><div class="t-main">八字日练</div><div class="t-sub">五模式练习 · 学习计划</div></div>
+        <span class="no">壹</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" href="https://nevergiveup0618.github.io/bazi-xiangfa/">
         <div class="ic">象</div>
         <div class="txt"><div class="t-main">八字象义</div><div class="t-sub">象义图谱 · 查共象 · 刷卡</div></div>
-        <span class="arrow">&#8250;</span>
+        <span class="no">贰</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" href="https://nevergiveup0618.github.io/liuren-game/">
         <div class="ic">壬</div>
         <div class="txt"><div class="t-main">大六壬</div><div class="t-sub">起课 · 九宗门 · 毕法速查</div></div>
-        <span class="arrow">&#8250;</span>
+        <span class="no">叁</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" href="https://nevergiveup0618.github.io/zeri/">
         <div class="ic">日</div>
         <div class="txt"><div class="t-main">择日学习</div><div class="t-sub">查 · 算 · 学 三模式</div></div>
-        <span class="arrow">&#8250;</span>
+        <span class="no">肆</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" href="https://nevergiveup0618.github.io/yangong-beisong/">
         <div class="ic">山</div>
         <div class="txt"><div class="t-main">杨公背诵</div><div class="t-sub">五书口诀 · 易学图谱</div></div>
-        <span class="arrow">&#8250;</span>
+        <span class="no">伍</span><span class="arrow">&#8250;</span>
       </a>
     </main>
 
-    <div class="foot">五 术 一 门 &nbsp;·&nbsp; 可 添 加 到 手 机 主 屏</div>
+    <div class="foot">堪 舆 定 盘 &nbsp;·&nbsp; 择 术 而 入 &nbsp;·&nbsp; 可 添 加 到 主 屏</div>
   </div>
 
 <script>
+// —— 星空 ——
+(function(){
+  function field(el,n,maxr,tw){
+    var h="";
+    for(var i=0;i<n;i++){
+      var s=(Math.random()*maxr+0.4).toFixed(2);
+      var x=(Math.random()*100).toFixed(2), y=(Math.random()*100).toFixed(2);
+      var o=(Math.random()*0.6+0.2).toFixed(2);
+      var t=tw?(" animation:tw "+(Math.random()*4+2.5).toFixed(1)+"s ease-in-out "+(Math.random()*4).toFixed(1)+"s infinite;"):"";
+      h+='<span class="star" style="width:'+s+'px;height:'+s+'px;left:'+x+'%;top:'+y+'%;opacity:'+o+';'+t+'"></span>';
+    }
+    el.innerHTML=h;
+  }
+  field(document.getElementById('stars'),90,1.6,true);
+  field(document.getElementById('stars2'),50,1.0,false);
+})();
+
+// —— 罗盘 ——
+(function(){
+  var NS="http://www.w3.org/2000/svg", C=100;
+  function pt(cx,cy,r,deg){var a=(deg-90)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  // 外环:24山刻度 + 双圈
+  var out='';
+  out+='<circle cx="100" cy="100" r="94" stroke="currentColor" stroke-opacity=".55" stroke-width="1"/>';
+  out+='<circle cx="100" cy="100" r="80" stroke="currentColor" stroke-opacity=".3" stroke-width="1"/>';
+  for(var i=0;i<24;i++){
+    var deg=i*15, major=(i%3===0);
+    var r1=94, r2=major?80:86;
+    var a=(deg-90)*Math.PI/180;
+    out+='<line x1="'+(100+r1*Math.cos(a)).toFixed(1)+'" y1="'+(100+r1*Math.sin(a)).toFixed(1)+'" x2="'+(100+r2*Math.cos(a)).toFixed(1)+'" y2="'+(100+r2*Math.sin(a)).toFixed(1)+'" stroke="currentColor" stroke-opacity="'+(major?'.85':'.4')+'" stroke-width="'+(major?1.4:0.8)+'"/>';
+  }
+  document.getElementById('ring-out').innerHTML=out;
+  // 内环:八卦 + 圈
+  var trig=['☰','☱','☲','☳','☴','☵','☶','☷'];
+  var inn='';
+  inn+='<circle cx="100" cy="100" r="64" stroke="#8fd3e0" stroke-opacity=".35" stroke-width="1"/>';
+  inn+='<circle cx="100" cy="100" r="44" stroke="currentColor" stroke-opacity=".35" stroke-width="1"/>';
+  for(var k=0;k<8;k++){
+    var d=k*45, a2=(d-90)*Math.PI/180, rr=54;
+    var x=(100+rr*Math.cos(a2)), y=(100+rr*Math.sin(a2));
+    inn+='<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" fill="#8fd3e0" fill-opacity=".8" font-size="11" text-anchor="middle" dominant-baseline="central">'+trig[k]+'</text>';
+  }
+  document.getElementById('ring-in').innerHTML=inn;
+})();
+
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
 </script>
 </body>
