@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1020">
+<title>五术堂</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='none' stroke='%23d9b877' stroke-width='5'/><circle cx='50' cy='50' r='10' fill='%23d9b877'/></svg>">
+<style>
+  :root{ --gold:#d9b877; --gold-hi:#f4e6be; --ink:#e9edf8; --bar:#0a1020; --line:rgba(217,184,119,.28); }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;background:#05070f;}
+  body{display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden;
+    font-family:"Noto Serif SC","Songti SC","PingFang SC",serif;}
+  .bar{
+    flex:0 0 auto; position:relative; display:flex; align-items:center; justify-content:center;
+    height:48px; padding-top:env(safe-area-inset-top);
+    background:linear-gradient(180deg,#0d1426,#0a1020);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 2px 14px rgba(0,0,0,.5); z-index:5;
+  }
+  .back{
+    position:absolute; left:6px; top:50%; transform:translateY(-50%);
+    margin-top:calc(env(safe-area-inset-top)/2);
+    display:flex; align-items:center; gap:4px; padding:8px 14px;
+    color:var(--gold-hi); font-weight:600; font-size:15px; text-decoration:none;
+    letter-spacing:.02em; border-radius:20px; transition:background .2s;
+  }
+  .back:active{background:rgba(217,184,119,.14);}
+  .back .chev{font-size:20px; line-height:1; margin-top:-1px;}
+  .title{
+    font-size:15.5px; letter-spacing:.22em; color:var(--ink); padding-left:.22em;
+    margin-top:calc(env(safe-area-inset-top)/2);
+    max-width:52%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .dot{position:absolute; right:16px; top:50%; transform:translateY(-50%);
+    margin-top:calc(env(safe-area-inset-top)/2);
+    width:7px; height:7px; border-radius:50%; background:var(--gold); opacity:.5;
+    box-shadow:0 0 8px var(--gold);}
+  #frame{flex:1 1 auto; width:100%; border:0; background:#fff; display:block;}
+  .load{position:absolute; inset:48px 0 0 0; display:grid; place-items:center; color:#8a94ac;
+    font-size:13px; letter-spacing:.2em; pointer-events:none; transition:opacity .4s; background:#05070f;}
+  .load.hide{opacity:0;}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="./" aria-label="返回首页"><span class="chev">&#8249;</span>返回首页</a>
+    <div class="title" id="title">五术堂</div>
+    <span class="dot"></span>
+  </div>
+  <div class="load" id="load">载 入 中…</div>
+  <iframe id="frame" title="模块" allow="clipboard-write; fullscreen"></iframe>
+
+<script>
+  var APPS = {
+    bazi:    {u:'https://nevergiveup0618.github.io/bazi-game/',       n:'八字日练'},
+    xiangfa: {u:'https://nevergiveup0618.github.io/bazi-xiangfa/',    n:'八字象义'},
+    liuren:  {u:'https://nevergiveup0618.github.io/liuren-game/',     n:'大六壬'},
+    zeri:    {u:'https://nevergiveup0618.github.io/zeri/',            n:'择日学习'},
+    yangong: {u:'https://nevergiveup0618.github.io/yangong-beisong/', n:'杨公背诵'}
+  };
+  function getParam(k){
+    var m = new RegExp('[?&]'+k+'=([^&]+)').exec(location.search);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  var key = getParam('app');
+  var app = APPS[key];
+  if(!app){ location.replace('./'); }
+  else {
+    document.getElementById('title').textContent = app.n;
+    document.title = app.n + ' · 五术堂';
+    var f = document.getElementById('frame');
+    f.addEventListener('load', function(){ document.getElementById('load').classList.add('hide'); });
+    f.src = app.u;
+  }
+</script>
+</body>
+</html>
