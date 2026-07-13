@@ -5,11 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a1020">
 <title>五术堂</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='none' stroke='%23d9b877' stroke-width='5'/><circle cx='50' cy='50' r='10' fill='%23d9b877'/></svg>">
+<link rel="icon" href="icon192.png">
+<link rel="apple-touch-icon" href="icon180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   :root{
-    --gold:#d9b877; --gold-hi:#f4e6be; --ink:#e9edf8; --line:rgba(217,184,119,.28);
-    --barh:48px; --top:env(safe-area-inset-top);
+    --gold:#d9b877; --gold-hi:#f4e6be; --ink:#e9edf8; --ink-dim:#8a94ac;
+    --line:rgba(217,184,119,.28); --barh:48px; --top:env(safe-area-inset-top);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#05070f;
@@ -23,18 +26,47 @@
     border-bottom:1px solid var(--line); box-shadow:0 2px 14px rgba(0,0,0,.5);
   }
   .back{
-    position:absolute; left:6px; bottom:0; height:var(--barh);
-    display:flex; align-items:center; gap:4px; padding:0 14px;
+    position:absolute; left:4px; bottom:0; height:var(--barh);
+    display:flex; align-items:center; gap:4px; padding:0 12px;
     color:var(--gold-hi); font-weight:600; font-size:15px; text-decoration:none; letter-spacing:.02em;
   }
   .back:active{background:rgba(217,184,119,.14); border-radius:12px;}
   .back .chev{font-size:20px; line-height:1; margin-top:-1px;}
   .title{
     font-size:15.5px; letter-spacing:.22em; color:var(--ink); padding-left:.22em;
-    max-width:52%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    max-width:44%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .dot{position:absolute; right:16px; bottom:calc(var(--barh)/2 - 3px);
-    width:7px; height:7px; border-radius:50%; background:var(--gold); opacity:.5; box-shadow:0 0 8px var(--gold);}
+  /* 切换模块 */
+  .sw{
+    position:absolute; right:6px; bottom:0; height:var(--barh);
+    display:flex; align-items:center; gap:5px; padding:0 12px;
+    background:none; border:0; cursor:pointer;
+    color:var(--gold); font-size:13.5px; letter-spacing:.06em;
+    font-family:inherit;
+  }
+  .sw:active{background:rgba(217,184,119,.14); border-radius:12px;}
+  .sw .car{font-size:10px; transition:transform .2s;}
+  .sw.open .car{transform:rotate(180deg);}
+  .menu{
+    position:fixed; right:8px; top:calc(var(--barh) + var(--top) + 6px); z-index:20;
+    min-width:160px; padding:6px; border-radius:14px;
+    background:rgba(13,20,38,.96); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    border:1px solid var(--line); box-shadow:0 12px 34px rgba(0,0,0,.6);
+    display:none; flex-direction:column; gap:2px;
+  }
+  .menu.on{display:flex;}
+  .menu a{
+    display:flex; align-items:center; gap:9px; padding:11px 12px; border-radius:10px;
+    color:var(--ink); text-decoration:none; font-size:14.5px; letter-spacing:.06em;
+  }
+  .menu a:active{background:rgba(217,184,119,.16);}
+  .menu a .g{
+    width:26px; height:26px; flex:0 0 26px; border-radius:8px; display:grid; place-items:center;
+    font-size:13px; color:var(--gold-hi); background:#1c2740; border:1px solid var(--line);
+  }
+  .menu a.cur{color:var(--gold-hi); background:rgba(217,184,119,.1);}
+  .mask{position:fixed; inset:0; z-index:15; display:none;}
+  .mask.on{display:block;}
   /* 内容区:固定填满返回条以下,自身可滚动 */
   .stage{
     position:fixed; left:0; right:0; bottom:0; top:calc(var(--barh) + var(--top));
@@ -43,7 +75,7 @@
   #frame{display:block; width:100%; height:100%; border:0;}
   .load{
     position:fixed; left:0; right:0; bottom:0; top:calc(var(--barh) + var(--top)); z-index:2;
-    display:grid; place-items:center; color:#8a94ac; font-size:13px; letter-spacing:.2em;
+    display:grid; place-items:center; color:var(--ink-dim); font-size:13px; letter-spacing:.2em;
     pointer-events:none; transition:opacity .4s; background:#05070f;
   }
   .load.hide{opacity:0;}
@@ -53,8 +85,11 @@
   <div class="bar">
     <a class="back" href="./" aria-label="返回首页"><span class="chev">&#8249;</span>返回首页</a>
     <div class="title" id="title">五术堂</div>
-    <span class="dot"></span>
+    <button class="sw" id="sw" aria-label="切换模块">切换<span class="car">&#9660;</span></button>
   </div>
+  <div class="mask" id="mask"></div>
+  <div class="menu" id="menu"></div>
+
   <div class="stage">
     <iframe id="frame" title="模块" allow="clipboard-write; fullscreen"></iframe>
   </div>
@@ -62,26 +97,51 @@
 
 <script>
   var APPS = {
-    bazi:    {u:'https://nevergiveup0618.github.io/bazi-game/',       n:'八字日练'},
-    xiangfa: {u:'https://nevergiveup0618.github.io/bazi-xiangfa/',    n:'八字象义'},
-    liuren:  {u:'https://nevergiveup0618.github.io/liuren-game/',     n:'大六壬'},
-    zeri:    {u:'https://nevergiveup0618.github.io/zeri/',            n:'择日学习'},
-    yangong: {u:'https://nevergiveup0618.github.io/yangong-beisong/', n:'杨公背诵'}
+    bazi:    {u:'https://nevergiveup0618.github.io/bazi-game/',       n:'八字日练',  g:'卦'},
+    xiangfa: {u:'https://nevergiveup0618.github.io/bazi-xiangfa/',    n:'八字象义',  g:'象'},
+    liuren:  {u:'https://nevergiveup0618.github.io/liuren-game/',     n:'大六壬',    g:'壬'},
+    zeri:    {u:'https://nevergiveup0618.github.io/zeri/',            n:'择日学习',  g:'日'},
+    yangong: {u:'https://nevergiveup0618.github.io/yangong-beisong/', n:'杨公背诵',  g:'山'}
   };
   function getParam(k){
     var m = new RegExp('[?&]'+k+'=([^&#]+)').exec(location.search);
     return m ? decodeURIComponent(m[1]) : '';
   }
-  var app = APPS[getParam('app')];
+  var key = getParam('app');
+  var app = APPS[key];
+
   if(!app){ location.replace('./'); }
   else {
     document.getElementById('title').textContent = app.n;
     document.title = app.n + ' · 五术堂';
-    var f = document.getElementById('frame');
-    f.addEventListener('load', function(){ document.getElementById('load').classList.add('hide'); });
-    // 兜底:5秒后无论如何隐藏载入层
-    setTimeout(function(){ document.getElementById('load').classList.add('hide'); }, 5000);
+
+    // 记录使用次数与最近一次(供首页排序/继续上次)
+    try{
+      var u = JSON.parse(localStorage.getItem('wst_usage') || '{}');
+      u[key] = (+u[key] || 0) + 1;
+      localStorage.setItem('wst_usage', JSON.stringify(u));
+      localStorage.setItem('wst_last', key);
+    }catch(e){}
+
+    // 载入模块
+    var f = document.getElementById('frame'), load = document.getElementById('load');
+    f.addEventListener('load', function(){ load.classList.add('hide'); });
+    setTimeout(function(){ load.classList.add('hide'); }, 5000);  // 兜底
     f.src = app.u;
+
+    // 快速切换模块
+    var menu = document.getElementById('menu'), sw = document.getElementById('sw'), mask = document.getElementById('mask');
+    var html = '';
+    for(var k in APPS){
+      html += '<a href="view.html?app='+k+'" class="'+(k===key?'cur':'')+'">'
+            + '<span class="g">'+APPS[k].g+'</span>'+APPS[k].n+'</a>';
+    }
+    menu.innerHTML = html;
+    function toggle(on){
+      menu.classList.toggle('on', on); mask.classList.toggle('on', on); sw.classList.toggle('open', on);
+    }
+    sw.addEventListener('click', function(e){ e.stopPropagation(); toggle(!menu.classList.contains('on')); });
+    mask.addEventListener('click', function(){ toggle(false); });
   }
 </script>
 </body>

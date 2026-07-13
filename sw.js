@@ -1,5 +1,6 @@
-const CACHE = 'mingli-home-v3';
-const ASSETS = ['./', './index.html', './manifest.json'];
+const CACHE = 'mingli-home-v4';
+const ASSETS = ['./', './index.html', './view.html', './manifest.json',
+                './icon180.png', './icon192.png', './icon512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

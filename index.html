@@ -6,7 +6,22 @@
 <meta name="theme-color" content="#05070f">
 <title>五术堂 · 命理导航</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='44' fill='none' stroke='%23d9b877' stroke-width='5'/><circle cx='50' cy='50' r='10' fill='%23d9b877'/></svg>">
+<link rel="icon" href="icon192.png">
+<!-- iOS 加桌图标与全屏 -->
+<link rel="apple-touch-icon" href="icon180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="五术堂">
+<!-- 微信/社交分享卡片 -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="五术堂 · 命理学习导航">
+<meta property="og:description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵,一个入口全部打开。">
+<meta property="og:image" content="https://nevergiveup0618.github.io/all-project/og.png">
+<meta property="og:url" content="https://nevergiveup0618.github.io/all-project/">
+<meta name="description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵,一个入口全部打开。">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="五术堂 · 命理学习导航">
+<meta name="twitter:image" content="https://nevergiveup0618.github.io/all-project/og.png">
 <style>
   :root{
     --bg0:#05070f; --bg1:#0a1020;
@@ -97,6 +112,24 @@
   .arrow{color:var(--gold); font-size:21px; opacity:.5; flex:0 0 auto; transition:transform .2s,opacity .2s;}
   .card:hover .arrow{opacity:1; transform:translateX(3px);}
 
+  /* 学习看板徽标 */
+  .badge{
+    display:none; margin-top:6px; font:500 11.5px/1.5 "PingFang SC",sans-serif;
+    color:#8fd3e0; letter-spacing:.03em;
+  }
+  .badge.on{display:block;}
+  .badge b{color:var(--gold-hi); font-weight:600;}
+  /* 继续上次 */
+  .cont{
+    display:none; align-items:center; gap:8px; margin:-16px 0 26px;
+    padding:9px 16px 9px 13px; border-radius:22px; text-decoration:none;
+    background:rgba(217,184,119,.1); border:1px solid rgba(217,184,119,.32);
+    color:var(--gold-hi); font-size:13px; letter-spacing:.06em;
+    opacity:0; animation:fade .8s .45s ease forwards;
+  }
+  .cont.on{display:inline-flex;}
+  .cont:active{background:rgba(217,184,119,.2);}
+  .cont .k{font-size:11px; color:var(--ink-dim); letter-spacing:.1em;}
   .foot{margin-top:40px; font-size:10.5px; letter-spacing:.24em; color:rgba(138,148,172,.5); text-align:center;
     opacity:0; animation:fade 1s 1s ease forwards;}
   @keyframes fade{to{opacity:1;}}
@@ -122,30 +155,37 @@
       <p class="sub">命 理 · 一 门 五 术</p>
     </div>
 
-    <main class="grid">
-      <a class="card" href="view.html?app=bazi">
+    <a class="cont" id="cont" href="#"><span class="k">继续</span><span id="cont-name"></span> &#8250;</a>
+
+    <main class="grid" id="grid">
+      <a class="card" data-app="bazi" href="view.html?app=bazi">
         <div class="ic">卦</div>
-        <div class="txt"><div class="t-main">八字日练</div><div class="t-sub">五模式练习 · 学习计划</div></div>
+        <div class="txt"><div class="t-main">八字日练</div><div class="t-sub">五模式练习 · 学习计划</div>
+          <div class="badge"></div></div>
         <span class="no">壹</span><span class="arrow">&#8250;</span>
       </a>
-      <a class="card" href="view.html?app=xiangfa">
+      <a class="card" data-app="xiangfa" href="view.html?app=xiangfa">
         <div class="ic">象</div>
-        <div class="txt"><div class="t-main">八字象义</div><div class="t-sub">象义图谱 · 查共象 · 刷卡</div></div>
+        <div class="txt"><div class="t-main">八字象义</div><div class="t-sub">象义图谱 · 查共象 · 刷卡</div>
+          <div class="badge"></div></div>
         <span class="no">贰</span><span class="arrow">&#8250;</span>
       </a>
-      <a class="card" href="view.html?app=liuren">
+      <a class="card" data-app="liuren" href="view.html?app=liuren">
         <div class="ic">壬</div>
-        <div class="txt"><div class="t-main">大六壬</div><div class="t-sub">起课 · 九宗门 · 毕法速查</div></div>
+        <div class="txt"><div class="t-main">大六壬</div><div class="t-sub">起课 · 九宗门 · 毕法速查</div>
+          <div class="badge"></div></div>
         <span class="no">叁</span><span class="arrow">&#8250;</span>
       </a>
-      <a class="card" href="view.html?app=zeri">
+      <a class="card" data-app="zeri" href="view.html?app=zeri">
         <div class="ic">日</div>
-        <div class="txt"><div class="t-main">择日学习</div><div class="t-sub">查 · 算 · 学 三模式</div></div>
+        <div class="txt"><div class="t-main">择日学习</div><div class="t-sub">查 · 算 · 学 三模式</div>
+          <div class="badge"></div></div>
         <span class="no">肆</span><span class="arrow">&#8250;</span>
       </a>
-      <a class="card" href="view.html?app=yangong">
+      <a class="card" data-app="yangong" href="view.html?app=yangong">
         <div class="ic">山</div>
-        <div class="txt"><div class="t-main">杨公背诵</div><div class="t-sub">五书口诀 · 易学图谱</div></div>
+        <div class="txt"><div class="t-main">杨公背诵</div><div class="t-sub">五书口诀 · 易学图谱</div>
+          <div class="badge"></div></div>
         <span class="no">伍</span><span class="arrow">&#8250;</span>
       </a>
     </main>
@@ -197,6 +237,77 @@
     inn+='<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" fill="#8fd3e0" fill-opacity=".8" font-size="11" text-anchor="middle" dominant-baseline="central">'+trig[k]+'</text>';
   }
   document.getElementById('ring-in').innerHTML=inn;
+})();
+
+// —— 学习看板 + 继续上次 + 按使用频率排序 ——
+// 同域共享 localStorage,直接读各App的真实存储键
+(function(){
+  var NAMES={bazi:'八字日练',xiangfa:'八字象义',liuren:'大六壬',zeri:'择日学习',yangong:'杨公背诵'};
+  function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+  function today(){return new Date().toISOString().slice(0,10);}
+
+  var STAT={
+    // bazi_cat_stats: {类目:{correct/ok, wrong, total}}
+    bazi:function(){
+      var s=J('bazi_cat_stats',{}),tot=0,cor=0;
+      for(var k in s){ var v=s[k]||{};
+        var c=+(v.correct!=null?v.correct:(v.ok!=null?v.ok:0))||0;
+        var w=+(v.wrong||0)||0;
+        var t=+(v.total!=null?v.total:(c+w))||0;
+        tot+=t; cor+=c; }
+      return tot ? '已练 <b>'+tot+'</b> 题 · 正确率 <b>'+Math.round(cor/tot*100)+'%</b>' : null;
+    },
+    // lr_weak: {类目:{q:出题, w:错}}
+    liuren:function(){
+      var d=J('lr_weak',{}),n=0;
+      for(var k in d){ if((+(d[k]||{}).w||0)>0) n++; }
+      return n ? '薄弱 <b>'+n+'</b> 类待攻' : null;
+    },
+    // zeri_wrong_v1: 错题数组; zeri_streak_v1: {last,days}
+    zeri:function(){
+      var w=J('zeri_wrong_v1',[]),st=J('zeri_streak_v1',{}),p=[];
+      if(Array.isArray(w)&&w.length) p.push('错题 <b>'+w.length+'</b>');
+      if(st&&+st.days>0) p.push('连续 <b>'+st.days+'</b> 天');
+      return p.length ? p.join(' · ') : null;
+    },
+    // yangpu: {条目:{date, known, seen}} —— 与App一致:date===今日 才算今日
+    yangong:function(){
+      var s=J('yangpu',{}),t=today(),n=0;
+      for(var k in s){ var v=s[k]||{}; if(v&&v.date===t) n+=(+v.known||0); }
+      return n ? '今日已背 <b>'+n+'</b>' : null;
+    },
+    // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录
+    xiangfa:function(){
+      var pre='bazi_xiangyi_mobile_v2__',c=0;
+      try{ for(var i=0;i<localStorage.length;i++){ if((localStorage.key(i)||'').indexOf(pre)===0) c++; } }
+      catch(e){ return null; }
+      return c ? '已有学习记录' : null;
+    }
+  };
+
+  var cards=[].slice.call(document.querySelectorAll('.card'));
+  cards.forEach(function(c){
+    var f=STAT[c.getAttribute('data-app')]; if(!f) return;
+    var t=null; try{ t=f(); }catch(e){ t=null; }   // 读不到就不显示,绝不显示错数字
+    if(t){ var b=c.querySelector('.badge'); b.innerHTML=t; b.className='badge on'; }
+  });
+
+  // 按使用频率排序(常用的排前面,未用过的保持原序)
+  var usage=J('wst_usage',{}), grid=document.getElementById('grid');
+  var sorted=cards.slice().sort(function(a,b){
+    var ua=+usage[a.getAttribute('data-app')]||0, ub=+usage[b.getAttribute('data-app')]||0;
+    return ub!==ua ? ub-ua : cards.indexOf(a)-cards.indexOf(b);
+  });
+  sorted.forEach(function(c){ grid.appendChild(c); });
+
+  // 继续上次
+  var last=null; try{ last=localStorage.getItem('wst_last'); }catch(e){}
+  if(last && NAMES[last]){
+    var el=document.getElementById('cont');
+    document.getElementById('cont-name').textContent=NAMES[last];
+    el.href='view.html?app='+last;
+    el.className='cont on';
+  }
 })();
 
 if('serviceWorker' in navigator){
