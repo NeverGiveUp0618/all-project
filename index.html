@@ -247,34 +247,36 @@
   function today(){return new Date().toISOString().slice(0,10);}
 
   var STAT={
-    // bazi_cat_stats: {类目:{correct/ok, wrong, total}}
+    // bazi_cat_stats: {类目:{a:答题数, e:错数}}  ——与 updateCatStats() 一致
     bazi:function(){
-      var s=J('bazi_cat_stats',{}),tot=0,cor=0;
-      for(var k in s){ var v=s[k]||{};
-        var c=+(v.correct!=null?v.correct:(v.ok!=null?v.ok:0))||0;
-        var w=+(v.wrong||0)||0;
-        var t=+(v.total!=null?v.total:(c+w))||0;
-        tot+=t; cor+=c; }
-      return tot ? '已练 <b>'+tot+'</b> 题 · 正确率 <b>'+Math.round(cor/tot*100)+'%</b>' : null;
+      var s=J('bazi_cat_stats',{}),a=0,e=0;
+      for(var k in s){ var v=s[k]||{}; a+=+v.a||0; e+=+v.e||0; }
+      return a ? '已练 <b>'+a+'</b> 题 · 正确率 <b>'+Math.round((a-e)/a*100)+'%</b>' : null;
     },
-    // lr_weak: {类目:{q:出题, w:错}}
+    // lr_weak: {类目:{q:出题, w:错}} ——与 getWeakSpot() 一致:只看 q>=5,取错误率最高
     liuren:function(){
-      var d=J('lr_weak',{}),n=0;
-      for(var k in d){ if((+(d[k]||{}).w||0)>0) n++; }
-      return n ? '薄弱 <b>'+n+'</b> 类待攻' : null;
+      var d=J('lr_weak',{}),best=null,br=-1;
+      for(var k in d){
+        var v=d[k]||{}, q=+v.q||0, w=+v.w||0;
+        if(q>=5){ var r=w/q; if(r>br){ br=r; best=k; } }
+      }
+      return (best&&br>0) ? '薄弱:<b>'+best+'</b> · 错误率 <b>'+Math.round(br*100)+'%</b>' : null;
     },
-    // zeri_wrong_v1: 错题数组; zeri_streak_v1: {last,days}
+    // zeri_wrong_v1: 错题Set; zeri_streak_v1: {last,days}
+    // 注意:择日的日期格式不补零(2026-7-13);days是存量,断签不会清零 → 需自行判定是否仍连续
     zeri:function(){
       var w=J('zeri_wrong_v1',[]),st=J('zeri_streak_v1',{}),p=[];
       if(Array.isArray(w)&&w.length) p.push('错题 <b>'+w.length+'</b>');
-      if(st&&+st.days>0) p.push('连续 <b>'+st.days+'</b> 天');
+      function ds(t){ return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate(); }
+      var td=ds(new Date()), yd=ds(new Date(Date.now()-864e5));
+      if(st && +st.days>0 && (st.last===td || st.last===yd)) p.push('连续 <b>'+st.days+'</b> 天');
       return p.length ? p.join(' · ') : null;
     },
-    // yangpu: {条目:{date, known, seen}} —— 与App一致:date===今日 才算今日
+    // yangpu: {书:{date, seen, known}} ——与App一致:今日已背=seen,记住=known(日期为ISO)
     yangong:function(){
-      var s=J('yangpu',{}),t=today(),n=0;
-      for(var k in s){ var v=s[k]||{}; if(v&&v.date===t) n+=(+v.known||0); }
-      return n ? '今日已背 <b>'+n+'</b>' : null;
+      var s=J('yangpu',{}),t=today(),seen=0,known=0;
+      for(var k in s){ var v=s[k]||{}; if(v && v.date===t){ seen+=+v.seen||0; known+=+v.known||0; } }
+      return seen ? '今日已背 <b>'+seen+'</b> · 记住 <b>'+known+'</b>' : null;
     },
     // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录
     xiangfa:function(){
