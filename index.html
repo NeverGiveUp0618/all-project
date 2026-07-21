@@ -15,10 +15,10 @@
 <!-- 微信/社交分享卡片 -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="五术堂 · 命理学习导航">
-<meta property="og:description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵,一个入口全部打开。">
+<meta property="og:description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵 · 风水识形，一个入口全部打开。">
 <meta property="og:image" content="https://nevergiveup0618.github.io/all-project/og.png">
 <meta property="og:url" content="https://nevergiveup0618.github.io/all-project/">
-<meta name="description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵,一个入口全部打开。">
+<meta name="description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵 · 风水识形，一个入口全部打开。">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="五术堂 · 命理学习导航">
 <meta name="twitter:image" content="https://nevergiveup0618.github.io/all-project/og.png">
@@ -93,7 +93,7 @@
     background:linear-gradient(var(--cyan),var(--gold)); opacity:.9;}
   .card:nth-child(1){animation-delay:.5s}.card:nth-child(2){animation-delay:.58s}
   .card:nth-child(3){animation-delay:.66s}.card:nth-child(4){animation-delay:.74s}
-  .card:nth-child(5){animation-delay:.82s}
+  .card:nth-child(5){animation-delay:.82s}.card:nth-child(6){animation-delay:.9s}
   .card:active{transform:scale(.985);}
   .card:hover{border-color:rgba(217,184,119,.5);
     box-shadow:0 12px 38px rgba(0,0,0,.55), 0 0 0 1px rgba(217,184,119,.14);
@@ -188,6 +188,12 @@
           <div class="badge"></div></div>
         <span class="no">伍</span><span class="arrow">&#8250;</span>
       </a>
+      <a class="card" data-app="fengshui" href="view.html?app=fengshui">
+        <div class="ic">峦</div>
+        <div class="txt"><div class="t-main">风水识形</div><div class="t-sub">龙砂水穴 · 看图辨形 · 城市选宅</div>
+          <div class="badge"></div></div>
+        <span class="no">陆</span><span class="arrow">&#8250;</span>
+      </a>
     </main>
 
     <div class="foot">堪 舆 定 盘 &nbsp;·&nbsp; 择 术 而 入 &nbsp;·&nbsp; 可 添 加 到 主 屏</div>
@@ -242,7 +248,7 @@
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
 // 同域共享 localStorage,直接读各App的真实存储键
 (function(){
-  var NAMES={bazi:'八字日练',xiangfa:'八字象义',liuren:'大六壬',zeri:'择日学习',yangong:'杨公背诵'};
+  var NAMES={bazi:'八字日练',xiangfa:'八字象义',liuren:'大六壬',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形'};
   function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
   function today(){return new Date().toISOString().slice(0,10);}
 
