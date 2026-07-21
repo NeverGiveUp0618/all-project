@@ -130,40 +130,12 @@
   .cont.on{display:inline-flex;}
   .cont:active{background:rgba(217,184,119,.2);}
   .cont .k{font-size:11px; color:var(--ink-dim); letter-spacing:.1em;}
-  /* 今日功课：先告诉用户今天做什么，再进入各学习模块 */
-  .daily{
-    width:100%; max-width:452px; margin:0 0 18px; padding:18px;
-    border:1px solid rgba(217,184,119,.3); border-radius:18px;
-    background:linear-gradient(145deg,rgba(25,34,55,.88),rgba(11,17,31,.78));
-    box-shadow:0 10px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.05);
-    opacity:0; animation:rise .7s .46s ease forwards;
-  }
-  .daily-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
-  .daily-kicker{font:600 11px/1 "PingFang SC",sans-serif;color:var(--cyan);letter-spacing:.18em;margin-bottom:7px;}
-  .daily-title{font-size:21px;font-weight:650;letter-spacing:.08em;color:var(--gold-hi);}
-  .daily-date{font:500 11px/1.5 "PingFang SC",sans-serif;color:var(--ink-dim);white-space:nowrap;text-align:right;}
-  .daily-progress{height:4px;background:rgba(255,255,255,.07);border-radius:9px;overflow:hidden;margin-bottom:15px;}
-  .daily-progress i{display:block;width:0;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .35s ease;}
-  .task{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:11px;padding:12px 0;border-top:1px solid rgba(255,255,255,.07);}
-  .task.off{display:none;}
-  .task>div{min-width:0;}
-  .task:first-of-type{border-top:0;padding-top:0;}
-  .task:last-of-type{padding-bottom:0;}
-  .task-check{width:34px;height:34px;border-radius:50%;border:1px solid rgba(143,211,224,.45);background:rgba(143,211,224,.07);color:transparent;font-size:17px;cursor:pointer;}
-  .task-check.done{color:#08111b;background:var(--cyan);border-color:var(--cyan);}
-  .task-name{font-size:15px;font-weight:600;letter-spacing:.05em;}
-  .task-topic{margin-top:4px;font:600 12px/1.5 "PingFang SC",sans-serif;color:var(--cyan);}
-  .task-desc{margin-top:2px;font:400 11.5px/1.55 "PingFang SC",sans-serif;color:var(--ink-dim);}
-  .task-go{padding:8px 11px;border:1px solid rgba(217,184,119,.35);border-radius:10px;color:var(--gold-hi);text-decoration:none;font:500 12px/1 "PingFang SC",sans-serif;white-space:nowrap;background:rgba(217,184,119,.08);}
-  .task.done .task-name,.task.done .task-desc{opacity:.48;text-decoration:line-through;}
-  .daily-note{margin-top:14px;text-align:center;font:500 11.5px/1.5 "PingFang SC",sans-serif;color:var(--ink-dim);letter-spacing:.03em;}
   .foot{margin-top:40px; font-size:10.5px; letter-spacing:.24em; color:rgba(138,148,172,.5); text-align:center;
     opacity:0; animation:fade 1s 1s ease forwards;}
   @keyframes fade{to{opacity:1;}}
   @keyframes rise{to{opacity:1; transform:none;}}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;} .hero,.head,.daily,.card,.foot{opacity:1;transform:none;}}
-  @media (max-width:360px){.daily{padding:15px}.task{grid-template-columns:34px 1fr;gap:9px}.task-go{grid-column:2;justify-self:start;margin-top:-2px}.task-check{width:32px;height:32px}}
-  @media (min-width:600px){ .grid,.daily{max-width:540px;} .hero{width:240px;height:240px;} }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;} .hero,.head,.card,.foot{opacity:1;transform:none;}}
+  @media (min-width:600px){ .grid{max-width:540px;} .hero{width:240px;height:240px;} }
 </style>
 </head>
 <body>
@@ -184,30 +156,6 @@
     </div>
 
     <a class="cont" id="cont" href="#"><span class="k">继续</span><span id="cont-name"></span> &#8250;</a>
-
-    <section class="daily" aria-labelledby="daily-title">
-      <div class="daily-head">
-        <div><div class="daily-kicker">每站 5–10 分钟</div><div class="daily-title" id="daily-title">今日第 <span id="course-day">1</span> 课 <span id="daily-count">0/3</span></div></div>
-        <div class="daily-date" id="daily-date"></div>
-      </div>
-      <div class="daily-progress" aria-hidden="true"><i id="daily-bar"></i></div>
-      <div class="task" data-task="xiangfa">
-        <button class="task-check" type="button" aria-label="完成八字象义任务">&#10003;</button>
-        <div><div class="task-name">八字象义</div><div class="task-topic"></div><div class="task-desc"></div></div>
-        <a class="task-go" href="view.html?app=xiangfa">进入本课</a>
-      </div>
-      <div class="task" data-task="zeri">
-        <button class="task-check" type="button" aria-label="完成择日任务">&#10003;</button>
-        <div><div class="task-name">择日学习</div><div class="task-topic"></div><div class="task-desc"></div></div>
-        <a class="task-go" href="view.html?app=zeri">进入本课</a>
-      </div>
-      <div class="task" data-task="yangong">
-        <button class="task-check" type="button" aria-label="完成杨公背诵任务">&#10003;</button>
-        <div><div class="task-name">杨公背诵</div><div class="task-topic"></div><div class="task-desc"></div></div>
-        <a class="task-go" href="view.html?app=yangong">进入本课</a>
-      </div>
-      <div class="daily-note" id="daily-note">三个网站各学一点，总计约 15–30 分钟。</div>
-    </section>
 
     <main class="grid" id="grid">
       <a class="card" data-app="bazi" href="view.html?app=bazi">
@@ -289,95 +237,6 @@
     inn+='<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" fill="#8fd3e0" fill-opacity=".8" font-size="11" text-anchor="middle" dominant-baseline="central">'+trig[k]+'</text>';
   }
   document.getElementById('ring-in').innerHTML=inn;
-})();
-
-// —— 今日功课打卡（按本地日期每天自动重置） ——
-(function(){
-  function dayKey(){
-    var d=new Date();
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  }
-  var td=dayKey(), courseDay=1, lastComplete='', lastAdvanced='';
-  try{
-    courseDay=Math.max(1,Math.min(42,+localStorage.getItem('wst_course_day')||1));
-    lastComplete=localStorage.getItem('wst_course_complete')||'';
-    lastAdvanced=localStorage.getItem('wst_course_advanced')||'';
-    if(lastComplete && lastComplete!==td && lastAdvanced!==lastComplete){
-      courseDay=courseDay%42+1;
-      localStorage.setItem('wst_course_day',courseDay);
-      localStorage.setItem('wst_course_advanced',lastComplete);
-    }
-  }catch(e){}
-  var LESSONS={
-    xiangfa:[
-      ['十神取象','图鉴精读 3 条 → 闪卡 12 题 → 查 1 个共象 → 排盘验证 1 例'],
-      ['组合取象','组合卡精读 3 组 → 闪卡 12 题 → 找成立条件与反例 → 排盘验证'],
-      ['干支关系','精读冲合刑穿破 → 闪卡 12 题 → 象义树串联 → 排盘找作用宫位'],
-      ['神煞取象','精读 3 个神煞 → 闪卡 12 题 → 与十神宫位共象 → 排盘验证'],
-      ['纳音取象','精读 3 组纳音 → 闪卡 12 题 → 对照柱位 → 排盘补充背景象'],
-      ['宫位与岁运','精读年/月/日/时宫位 → 闪卡 12 题 → 加大运流年 → 完整断 1 盘']
-    ],
-    zeri:[
-      ['入门导览','精读本类 2 节 → 知识题 10 道 → 口述择日判断流程 → 错题复盘'],
-      ['必备基础','精读本类 2 节 → 知识题 10 道 → 速查题 5 道 → 错题复盘'],
-      ['择日方法','精读本类 2 节 → 比较两种方法 → 知识题 10 道 → 速查题 5 道'],
-      ['事项择日','精读 1 个事项全流程 → 列宜忌清单 → 知识题 10 道 → 模拟选日'],
-      ['神煞吉凶','精读 3 个神煞 → 速查题 8 道 → 说明取用条件 → 错题复盘'],
-      ['速查与计算','精读 2 张速查表 → 速查题 10 道 → 手算复核 2 道 → 错题清零']
-    ],
-    yangong:[
-      ['《阳宅断》','原文精读 1 节 → 闪卡 12 段 → 复习“不熟”卡 → 摘出 1 条断法'],
-      ['《阴宅断》','原文精读 1 节 → 闪卡 12 段 → 复习“不熟”卡 → 摘出 1 条断法'],
-      ['《指迷赋》','原文精读 1 节 → 闪卡 12 段 → 挖空背诵 → 口述本节主旨'],
-      ['《八条歌》','按歌精读 1 节 → 闪卡 12 段 → 挖空背诵 → 整理合局/破局对照'],
-      ['《三百六十形穴歌》','原文精读 1 节 → 闪卡 12 段 → 复习“不熟”卡 → 画面联想'],
-      ['口诀专题','专题精读 5 条 → 挖空练习 10 条 → 复习“不熟”口诀 → 默写 2 条'],
-      ['易学图谱','复习先后天八卦 → 六十四卦分组速查 → 口诀随机 10 条 → 周复盘']
-    ]
-  };
-  document.getElementById('course-day').textContent=courseDay;
-  var subjectIds=['xiangfa','zeri','yangong'];
-  var ACTIONS={
-    xiangfa:'精读 1 条 → 闪卡 3 题 → 查共象或排盘验证 1 次',
-    zeri:'精读 1 个知识点 → 做 3 道题 → 回看 1 道错题',
-    yangong:'精读 3 段 → 闪卡背诵 3 段 → 复习 2 段“不熟”内容'
-  };
-  var subjectLesson=courseDay-1;
-  subjectIds.forEach(function(id){
-    var row=document.querySelector('.task[data-task="'+id+'"]'), list=LESSONS[id], lesson=list[subjectLesson%list.length];
-    row.querySelector('.task-topic').textContent='本课主题：'+lesson[0];
-    row.querySelector('.task-desc').textContent=ACTIONS[id];
-    row.classList.remove('off');
-  });
-  var d=new Date(), week=['日','一','二','三','四','五','六'];
-  document.getElementById('daily-date').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日<br>星期'+week[d.getDay()];
-  var key='wst_daily_'+td+'_lesson_'+courseDay, done={};
-  try{done=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){done={};}
-  var tasks=[].slice.call(document.querySelectorAll('.task'));
-  function draw(){
-    var n=0, total=tasks.length;
-    tasks.forEach(function(row){
-      var id=row.getAttribute('data-task'), on=!!done[id];
-      row.classList.toggle('done',on); row.querySelector('.task-check').classList.toggle('done',on);
-      row.querySelector('.task-check').setAttribute('aria-pressed',on?'true':'false');
-      if(on)n++;
-    });
-    document.getElementById('daily-count').textContent=n+'/'+total;
-    document.getElementById('daily-bar').style.width=(n/total*100)+'%';
-    document.getElementById('daily-note').textContent=n===total?'第 '+courseDay+' 课已完成，下个学习日进入第 '+(courseDay%42+1)+' 课。':n>0?'已完成 '+n+' 个网站，还剩 '+(total-n)+' 个。':'三个网站各学一点，总计约 15–30 分钟。';
-    try{
-      if(n===total){localStorage.setItem('wst_course_complete',td);lastComplete=td;}
-      else if(lastComplete===td){localStorage.removeItem('wst_course_complete');lastComplete='';}
-    }catch(e){}
-  }
-  tasks.forEach(function(row){
-    row.querySelector('.task-check').addEventListener('click',function(){
-      var id=row.getAttribute('data-task'); done[id]=!done[id];
-      try{localStorage.setItem(key,JSON.stringify(done));}catch(e){}
-      draw();
-    });
-  });
-  draw();
 })();
 
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
