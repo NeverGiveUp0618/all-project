@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a1020">
-<title>五术堂</title>
+<title>易术堂</title>
 <link rel="icon" href="icon192.png">
 <link rel="apple-touch-icon" href="icon180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -84,7 +84,7 @@
 <body>
   <div class="bar">
     <a class="back" href="./" aria-label="返回首页"><span class="chev">&#8249;</span>返回首页</a>
-    <div class="title" id="title">五术堂</div>
+    <div class="title" id="title">易术堂</div>
     <button class="sw" id="sw" aria-label="切换模块">切换<span class="car">&#9660;</span></button>
   </div>
   <div class="mask" id="mask"></div>
@@ -114,7 +114,7 @@
   if(!app){ location.replace('./'); }
   else {
     document.getElementById('title').textContent = app.n;
-    document.title = app.n + ' · 五术堂';
+    document.title = app.n + ' · 易术堂';
 
     // 记录使用次数与最近一次(供首页排序/继续上次)
     try{
