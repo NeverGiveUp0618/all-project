@@ -126,6 +126,11 @@
 
     // 载入模块
     var f = document.getElementById('frame'), load = document.getElementById('load');
+    window.addEventListener('message', function(e){
+      if(e.origin!=='https://nevergiveup0618.github.io') return;
+      var d=e.data||{};if(d.type!=='yst-progress'||d.app!==key||typeof d.text!=='string')return;
+      try{localStorage.setItem('yst_stat_'+key,JSON.stringify({text:d.text.slice(0,120),at:Date.now()}));}catch(x){}
+    });
     f.addEventListener('load', function(){ load.classList.add('hide'); });
     setTimeout(function(){ load.classList.add('hide'); }, 5000);  // 兜底
     f.src = app.u;

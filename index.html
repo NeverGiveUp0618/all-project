@@ -250,7 +250,7 @@
 (function(){
   var NAMES={bazi:'八字日练',xiangfa:'八字象义',liuren:'大六壬',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形'};
   function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-  function today(){return new Date().toISOString().slice(0,10);}
+  function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
   var STAT={
     // bazi_cat_stats: {类目:{a:答题数, e:错数}}  ——与 updateCatStats() 一致
@@ -295,8 +295,8 @@
 
   var cards=[].slice.call(document.querySelectorAll('.card'));
   cards.forEach(function(c){
-    var f=STAT[c.getAttribute('data-app')]; if(!f) return;
-    var t=null; try{ t=f(); }catch(e){ t=null; }   // 读不到就不显示,绝不显示错数字
+    var appKey=c.getAttribute('data-app'),f=STAT[appKey]; if(!f) return;
+    var t=null,cached=J('yst_stat_'+appKey,null);try{t=cached&&cached.text?cached.text:f();}catch(e){t=null;}
     if(t){ var b=c.querySelector('.badge'); b.innerHTML=t; b.className='badge on'; }
   });
 
