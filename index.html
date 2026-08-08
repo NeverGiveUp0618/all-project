@@ -291,19 +291,20 @@
       for(var k in s){ var v=s[k]||{}; if(v && v.date===t){ seen+=+v.seen||0; known+=+v.known||0; } }
       return seen ? '今日已背 <b>'+seen+'</b> · 记住 <b>'+known+'</b>' : null;
     },
-    // 八字精讲:bazi_course_read {文档id:阅读百分比} / bazi_course_srs {题号:{d,i,s,g}}
-    //          bazi_course_tag_stats {考点:{a:答题数,e:未答对数}} ——与 bazi_cat_stats 同构
+    // 八字精讲:bazi_course_read {文档id:阅读百分比} / bazi_course_seen {题号:时间戳}
     // ⚠️ read 里教材(c1..c16)与笔记(n1..n14)混在一起,数"章"只能取 c 开头的;≥90 才算读完
+    // ⚠️ 该App刻意不做SRS/自评,没有正确率可显示——别再去读 srs / tag_stats,那两个键已废弃
     jingjiang:function(){
-      var r=J('bazi_course_read',{}),ch=0;
-      for(var k in r){ if(k.charAt(0)==='c' && (+r[k]||0)>=90) ch++; }
-      var done=Object.keys(J('bazi_course_srs',{})).length;
-      var s=J('bazi_course_tag_stats',{}),a=0,e=0;
-      for(var k2 in s){ var v=s[k2]||{}; a+=+v.a||0; e+=+v.e||0; }
+      var r=J('bazi_course_read',{}),ch=0,nt=0;
+      for(var k in r){
+        if((+r[k]||0)<90) continue;
+        if(k.charAt(0)==='c') ch++; else if(k.charAt(0)==='n') nt++;
+      }
+      var seen=Object.keys(J('bazi_course_seen',{})).length;
       var p=[];
       if(ch) p.push('读完 <b>'+ch+'</b>/16 章');
-      if(done) p.push('已练 <b>'+done+'</b> 题');
-      if(a) p.push('正确率 <b>'+Math.round((a-e)/a*100)+'%</b>');
+      if(nt) p.push('笔记 <b>'+nt+'</b>/14 篇');
+      if(seen) p.push('命例 <b>'+seen+'</b>/92 题');
       return p.length ? p.join(' · ') : null;
     },
     // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录

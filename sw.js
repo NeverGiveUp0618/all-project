@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v8-jingjiang';
+const CACHE = 'mingli-home-v9-jj-simple';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png'];
 
