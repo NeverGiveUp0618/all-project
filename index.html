@@ -15,10 +15,10 @@
 <!-- 微信/社交分享卡片 -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="易术堂 · 六术学习导航">
-<meta property="og:description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵 · 风水识形，一个入口全部打开。">
+<meta property="og:description" content="八字日练 · 象义随身 · 六壬神课 · 择日学习 · 杨公背诵 · 风水识形，一个入口全部打开。">
 <meta property="og:image" content="https://nevergiveup0618.github.io/all-project/og.png">
 <meta property="og:url" content="https://nevergiveup0618.github.io/all-project/">
-<meta name="description" content="八字日练 · 八字象义 · 大六壬 · 择日学习 · 杨公背诵 · 风水识形，一个入口全部打开。">
+<meta name="description" content="八字日练 · 象义随身 · 六壬神课 · 择日学习 · 杨公背诵 · 风水识形，一个入口全部打开。">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="易术堂 · 六术学习导航">
 <meta name="twitter:image" content="https://nevergiveup0618.github.io/all-project/og.png">
@@ -167,13 +167,13 @@
       </a>
       <a class="card" data-app="xiangfa" href="view.html?app=xiangfa">
         <div class="ic">象</div>
-        <div class="txt"><div class="t-main">八字象义</div><div class="t-sub">象义图谱 · 查共象 · 刷卡</div>
+        <div class="txt"><div class="t-main">象义随身</div><div class="t-sub">四术共象 · 查共象 · 推导练</div>
           <div class="badge"></div></div>
         <span class="no">贰</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="liuren" href="view.html?app=liuren">
         <div class="ic">壬</div>
-        <div class="txt"><div class="t-main">大六壬</div><div class="t-sub">起课 · 九宗门 · 毕法速查</div>
+        <div class="txt"><div class="t-main">六壬神课</div><div class="t-sub">起课 · 九宗门 · 毕法速查</div>
           <div class="badge"></div></div>
         <span class="no">叁</span><span class="arrow">&#8250;</span>
       </a>
@@ -255,7 +255,7 @@
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
 // 同域共享 localStorage,直接读各App的真实存储键
 (function(){
-  var NAMES={bazi:'八字日练',xiangfa:'八字象义',liuren:'大六壬',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形',jingjiang:'八字精讲'};
+  var NAMES={bazi:'八字日练',xiangfa:'象义随身',liuren:'六壬神课',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形',jingjiang:'八字精讲'};
   function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
