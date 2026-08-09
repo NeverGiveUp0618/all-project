@@ -294,6 +294,9 @@
     // 八字精讲:bazi_course_read {文档id:阅读百分比} / bazi_course_seen {题号:时间戳}
     // ⚠️ read 里教材(c1..c16)与笔记(n1..n14)混在一起,数"章"只能取 c 开头的;≥90 才算读完
     // ⚠️ 该App刻意不做SRS/自评,没有正确率可显示——别再去读 srs / tag_stats,那两个键已废弃
+    // ⚠️ 分母别再写死:那套内容一直在加(用户新问一题就多一篇笔记/多一道命例)。
+    //    该App启动时会把真实总量写进 bazi_course_counts,这里读它;
+    //    没打开过该App时(读不到)退回当前已知的数,只是显示,不影响功能。
     jingjiang:function(){
       var r=J('bazi_course_read',{}),ch=0,nt=0;
       for(var k in r){
@@ -301,10 +304,12 @@
         if(k.charAt(0)==='c') ch++; else if(k.charAt(0)==='n') nt++;
       }
       var seen=Object.keys(J('bazi_course_seen',{})).length;
+      var c=J('bazi_course_counts',{});
+      var nCh=+c.course||16, nNt=+c.notes||14, nQz=+c.quiz||92;
       var p=[];
-      if(ch) p.push('读完 <b>'+ch+'</b>/16 章');
-      if(nt) p.push('笔记 <b>'+nt+'</b>/14 篇');
-      if(seen) p.push('命例 <b>'+seen+'</b>/92 题');
+      if(ch) p.push('读完 <b>'+ch+'</b>/'+nCh+' 章');
+      if(nt) p.push('笔记 <b>'+nt+'</b>/'+nNt+' 篇');
+      if(seen) p.push('命例 <b>'+seen+'</b>/'+nQz+' 题');
       return p.length ? p.join(' · ') : null;
     },
     // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录
