@@ -197,7 +197,7 @@
       </a>
       <a class="card" data-app="jingjiang" href="view.html?app=jingjiang">
         <div class="ic">讲</div>
-        <div class="txt"><div class="t-main">八字精讲</div><div class="t-sub">教材通读 · 命例题库 · 逐题拆解</div>
+        <div class="txt"><div class="t-main">命理精讲</div><div class="t-sub">教材通读 · 命例题库 · 逐题拆解</div>
           <div class="badge"></div></div>
         <span class="no">柒</span><span class="arrow">&#8250;</span>
       </a>
@@ -255,7 +255,7 @@
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
 // 同域共享 localStorage,直接读各App的真实存储键
 (function(){
-  var NAMES={bazi:'八字日练',xiangfa:'象义随身',liuren:'六壬神课',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形',jingjiang:'八字精讲'};
+  var NAMES={bazi:'八字日练',xiangfa:'象义随身',liuren:'六壬神课',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形',jingjiang:'命理精讲'};
   function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
@@ -291,7 +291,7 @@
       for(var k in s){ var v=s[k]||{}; if(v && v.date===t){ seen+=+v.seen||0; known+=+v.known||0; } }
       return seen ? '今日已背 <b>'+seen+'</b> · 记住 <b>'+known+'</b>' : null;
     },
-    // 八字精讲:bazi_course_read {文档id:阅读百分比} / bazi_course_seen {题号:时间戳}
+    // 命理精讲(bazi-course):bazi_course_read {文档id:阅读百分比} / bazi_course_seen {题号:时间戳}
     // ⚠️ read 里教材(c1..c16)与笔记(n1..n14)混在一起,数"章"只能取 c 开头的;≥90 才算读完
     // ⚠️ 该App刻意不做SRS/自评,没有正确率可显示——别再去读 srs / tag_stats,那两个键已废弃
     // ⚠️ 分母别再写死:那套内容一直在加(用户新问一题就多一篇笔记/多一道命例)。
