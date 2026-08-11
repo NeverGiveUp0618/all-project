@@ -137,6 +137,23 @@
   @keyframes rise{to{opacity:1; transform:none;}}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;} .hero,.head,.card,.foot{opacity:1;transform:none;}}
   @media (min-width:600px){ .grid{max-width:540px;} .hero{width:240px;height:240px;} }
+  /* 宽屏铺开：手机单列，平板起两列，桌面三列。
+     ⚠️ 卡片本身是 flex 横向布局(图标+文字+箭头)，不必改结构，
+     只把外层 .grid 从单列 flex 换成多列 grid 即可。 */
+  @media (min-width:860px){
+    .grid{max-width:900px; display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+    .hero{width:250px; height:250px;}
+    h1{font-size:38px;}
+  }
+  @media (min-width:1240px){
+    .grid{max-width:1280px; grid-template-columns:repeat(3,1fr);}
+    .hero{width:270px; height:270px;}
+  }
+  /* 入场动画原本按 nth-child(1..7) 递延，两/三列下同排卡片该同时出现，
+     否则会看到逐个蹦。宽屏统一缩短延迟。 */
+  @media (min-width:860px){
+    .card:nth-child(n){animation-delay:.5s}
+  }
 </style>
 </head>
 <body>

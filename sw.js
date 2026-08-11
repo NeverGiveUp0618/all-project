@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v13-viewnames';
+const CACHE = 'mingli-home-v15-wide';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png'];
 
