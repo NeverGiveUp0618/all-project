@@ -315,7 +315,7 @@
       }
       var seen=Object.keys(J('bazi_course_seen',{})).length;
       var c=J('bazi_course_counts',{});
-      var nCh=+c.course||16, nNt=+c.notes||14, nQz=+c.quiz||92;
+      var nCh=+c.course||16, nNt=+c.notes||15, nQz=+c.quiz||334;   // 仅在没打开过该App时用；真实值由App写入 bazi_course_counts
       var p=[];
       if(ch) p.push('读完 <b>'+ch+'</b>/'+nCh+' 章');
       if(nt) p.push('笔记 <b>'+nt+'</b>/'+nNt+' 篇');
