@@ -1,9 +1,15 @@
-const CACHE = 'mingli-home-v15-wide';
+const CACHE = 'mingli-home-v16-noloop';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // ⚠️ addAll 必须兜底：任何一个资源取不到都会让 install 失败，
+  //    浏览器随后反复重试安装，是无限刷新的另一条可能路径（其余几个站早已加了 catch）。
+  e.waitUntil(
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS)).catch(() => {})
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {

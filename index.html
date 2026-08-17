@@ -357,10 +357,24 @@
 })();
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(function(reg){ reg.update(); }).catch(function(){});
-  var _refreshed=false;
+  /* ⚠️ 2026-08-17 修无限刷新：
+     原来是 register().then(reg=>reg.update()) ＋ controllerchange 里无条件 location.reload()，
+     而挡重复的 _refreshed 是普通 JS 变量 —— reload 会重建页面、把它清零。
+     于是只要 controllerchange 再触发一次，就又刷一次，循环不会自己停。
+     ⭐ 两处一起改：
+       ① 去掉 reg.update()：浏览器自己会检查 sw 更新，手动强制只是提高触发频率；
+       ② 守卫改放 sessionStorage —— 它能跨 reload 存活（同一标签页会话），
+          所以"更新后自动刷新一次"的体验保留，但最多刷一次。
+     注：sw 本来就是网络优先，页面拿到的一直是最新内容，这个 reload 只为让
+        新 sw 立刻接管，不是拿新内容的必要条件。*/
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+  var SWK='wst_sw_reloaded';
   navigator.serviceWorker.addEventListener('controllerchange', function(){
-    if(_refreshed) return; _refreshed=true; location.reload();
+    try{
+      if(sessionStorage.getItem(SWK)) return;   // 本次会话已经刷过，不再刷
+      sessionStorage.setItem(SWK,'1');
+    }catch(e){ return; }                        // 隐私模式取不到 storage 就干脆不刷
+    location.reload();
   });
 }
 </script>
