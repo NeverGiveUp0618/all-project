@@ -354,13 +354,12 @@
     if(t){ var b=c.querySelector('.badge'); b.innerHTML=t; b.className='badge on'; }
   });
 
-  // 按使用频率排序(常用的排前面,未用过的保持原序)
-  var usage=J('wst_usage',{}), grid=document.getElementById('grid');
-  var sorted=cards.slice().sort(function(a,b){
-    var ua=+usage[a.getAttribute('data-app')]||0, ub=+usage[b.getAttribute('data-app')]||0;
-    return ub!==ua ? ub-ua : cards.indexOf(a)-cards.indexOf(b);
-  });
-  sorted.forEach(function(c){ grid.appendChild(c); });
+  // ⭐ 卡片顺序固定，按 html 里的壹贰叁…原样排，不再动。
+  //    2026-08-23 按用户要求去掉"按使用频率重排"：
+  //    ① 位置本身就是记忆——常用的那个在第几行第几个，手指是记得住的，重排等于每次都要重找；
+  //    ② 卡片上印着壹贰叁肆伍陆柒捌，一重排序号就乱了，看着更怪。
+  //    ⚠️ 别再"优化"成动态排序（tests_nav.js 有断言锁着）。
+  //    wst_usage 仍由 view.html 照常统计，只是不再拿它排序。
 
   // 继续上次
   var last=null; try{ last=localStorage.getItem('wst_last'); }catch(e){}

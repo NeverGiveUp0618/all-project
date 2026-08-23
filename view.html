@@ -120,6 +120,7 @@
 
     // 记录使用次数与最近一次(供首页排序/继续上次)
     try{
+      // 仍照常统计（首页不再拿它排序，见 index.html 的说明），留着备用
       var u = JSON.parse(localStorage.getItem('wst_usage') || '{}');
       u[key] = (+u[key] || 0) + 1;
       localStorage.setItem('wst_usage', JSON.stringify(u));

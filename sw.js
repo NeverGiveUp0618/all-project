@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v17-lrcourse';
+const CACHE = 'mingli-home-v18-fixorder';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png'];
 
