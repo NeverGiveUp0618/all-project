@@ -60,9 +60,13 @@
 
 <div class="panel">
   <h2>① 导出</h2>
-  <p class="tip">点「生成备份」，下面会出现一段文本。<b>微信里就用「复制」</b>，然后发给自己（文件传输助手／收藏），换手机时再打开这个页面粘回去。</p>
+  <p class="tip">点「生成备份」，再选一种带走：<br>
+  ⭐ <b>生成恢复链接</b>（最省事）：把链接发给自己，新手机点开就自动恢复，不用复制粘贴。<br>
+  · <b>复制</b>：复制整段文本，发给自己保存。<br>
+  · <b>存成文件</b>：微信内多半拦下载——那就点右上角「⋯」→<b>在浏览器中打开</b>，那里下载和复制都正常。</p>
   <button class="btn main" id="gen">生成备份</button>
   <button class="btn" id="copy" disabled>复制</button>
+  <button class="btn" id="link" disabled>生成恢复链接</button>
   <button class="btn" id="dl" disabled>存成文件</button>
   <textarea id="out" placeholder="备份文本会出现在这里" readonly></textarea>
   <div class="msg" id="m1"></div>
@@ -160,30 +164,83 @@ $('#gen').onclick = function () {
     host: location.host, n: keys.length, data: data
   });
   $('#out').value = payload;
-  $('#copy').disabled = $('#dl').disabled = !payload;
+  $('#copy').disabled = $('#dl').disabled = $('#link').disabled = !payload;
   $('#m1').innerHTML = '<span class="ok">已生成</span>：' + keys.length + ' 项，' +
     bytes(payload.length) + '。<b>请把下面这段文本整段复制保存</b>。';
 };
 
 $('#copy').onclick = function () {
   if (!payload) return;
-  var el = $('#out');
-  el.removeAttribute('readonly'); el.focus(); el.select();
-  el.setSelectionRange(0, payload.length);   // iOS 上 select() 不够，要显式设范围
-  var done = false;
-  try { done = document.execCommand('copy'); } catch (e) {}
-  el.setAttribute('readonly', 'readonly');
-  if (!done && navigator.clipboard) {
+  var m = $('#m1');
+  function good() {
+    m.innerHTML = '<span class="ok">已复制</span>（' + payload.length +
+      ' 个字符）。发给自己保存，粘回去时<b>要一字不差</b>。';
+  }
+  function fail(why) {
+    m.innerHTML = '<span class="warn">复制没成功</span>（' + why + '）。<br>' +
+      '请<b>长按下面的文本框 → 全选 → 复制</b>；或者点「存成文件」。';
+  }
+  // ⚠️ 顺序很要紧：execCommand 在微信/iOS 上常常"返回 true 但剪贴板是空的"，
+  //    先信它就会让人以为复制好了，粘出来却是别的东西。所以 clipboard API 优先，
+  //    而且复制完回读一次校验，确认真进了剪贴板。
+  if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(payload).then(function () {
-      $('#m1').innerHTML = '<span class="ok">已复制</span>，去发给自己保存。';
-    }, function () {
-      $('#m1').innerHTML = '<span class="warn">复制没成功</span>——请长按上面的文本框全选后手动复制。';
-    });
+      if (navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(function (t) {
+          if (t === payload) good();
+          else fail('剪贴板里的内容对不上');
+        }, good);   // 读不了剪贴板是常态（要权限），不算失败
+      } else good();
+    }, function () { legacy(); });
     return;
   }
-  $('#m1').innerHTML = done
-    ? '<span class="ok">已复制</span>，去发给自己保存。'
-    : '<span class="warn">复制没成功</span>——请长按上面的文本框全选后手动复制。';
+  legacy();
+  function legacy() {
+    var el = $('#out');
+    el.removeAttribute('readonly');
+    el.focus();
+    el.setSelectionRange(0, el.value.length);
+    var done = false;
+    try { done = document.execCommand('copy'); } catch (e) {}
+    el.setAttribute('readonly', 'readonly');
+    if (done) good(); else fail('这个浏览器不让脚本复制');
+  }
+};
+
+/* ⭐ 恢复链接：把备份塞进 URL 的 # 后面。
+   为什么要这条路——微信里复制长文本极不可靠（剪贴板被截断、execCommand 假成功），
+   而"发一条链接给自己、在新手机上点开"是微信里最顺的操作。
+   # 后面的内容不会发到服务器，只在浏览器本地解析。 */
+// ⚠️ btoa 只吃 Latin-1，中文必须先转成 UTF-8 字节。
+//    这里不用 TextEncoder——老一点的 webview 里没有；unescape/encodeURIComponent
+//    这一对虽然是老写法，但从 iOS 到微信 X5 全都有。
+function toB64(str) {
+  return btoa(unescape(encodeURIComponent(str)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function fromB64(b) {
+  var t = b.replace(/-/g, '+').replace(/_/g, '/');
+  while (t.length % 4) t += '=';
+  return decodeURIComponent(escape(atob(t)));
+}
+
+$('#link').onclick = function () {
+  if (!payload) return;
+  var url;
+  try {
+    url = location.origin + location.pathname + '#r=' + toB64(payload);
+  } catch (e) {
+    $('#m1').innerHTML = '<span class="bad">这个浏览器生成不了链接</span>，请用「复制」。';
+    return;
+  }
+  $('#out').value = url;
+  var n = url.length;
+  var warn = n > 8000
+    ? '<br><span class="warn">⚠️ 链接很长（' + n + ' 字符），有的聊天软件会截断。' +
+      '发过去之后<b>务必点开试一次</b>，不行就改用「存成文件」。</span>'
+    : '';
+  $('#m1').innerHTML = '<span class="ok">已生成恢复链接</span>（' + n + ' 字符）。' +
+    '<b>把它发给自己，在新手机上点开就会自动恢复</b>，不用复制粘贴。' + warn;
 };
 
 $('#dl').onclick = function () {
@@ -210,13 +267,47 @@ $('#fi').onchange = function () {
   r.readAsText(f);
 };
 
+/* 点开恢复链接进来：把数据填好并直接走恢复流程，不让人再手动粘一次 */
+(function () {
+  var h = location.hash || '';
+  if (h.indexOf('#r=') !== 0) return;
+  var raw;
+  try { raw = fromB64(h.slice(3)); } catch (e) {
+    $('#m2').innerHTML = '<span class="bad">这个恢复链接是坏的</span>——多半是发送时被截断了。';
+    return;
+  }
+  $('#in').value = raw;
+  $('#m2').innerHTML = '<span class="ok">从链接读到了备份</span>，点下面的「恢复」写入本机。';
+  // 滚到导入区，免得人找不着
+  try { $('#imp').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+})();
+
 $('#imp').onclick = function () {
   if (!ls) return;
   var raw = $('#in').value.trim();
   if (!raw) { $('#m2').innerHTML = '<span class="bad">先粘贴备份文本</span>'; return; }
+  // ⚠️ 粘贴常带杂质：微信/输入法可能塞进零宽字符，聊天软件会把 " 变成中文引号，
+  //    有的还会在首尾加空格或把长文本截断。先洗一遍，再报错才有意义。
+  raw = raw.replace(/[\u200B-\u200D\uFEFF]/g, '')      // 零宽字符
+           .replace(/[\u201C\u201D]/g, '"')             // 中文双引号
+           .replace(/[\u2018\u2019]/g, "'")             // 中文单引号
+           .trim();
+  var i0 = raw.indexOf('{'), i1 = raw.lastIndexOf('}');
+  if (i0 > 0 || (i1 >= 0 && i1 < raw.length - 1)) raw = raw.slice(i0, i1 + 1);   // 掐掉前后多余的话
+
   var o;
   try { o = JSON.parse(raw); } catch (e) {
-    $('#m2').innerHTML = '<span class="bad">这段文本不是备份</span>——要整段粘贴，别漏了开头的 { 或结尾的 }。';
+    // 报出到底哪里不对——光说"不是备份"帮不上忙
+    var head = raw.slice(0, 24), tail = raw.slice(-24);
+    var why;
+    if (!raw) why = '框里是空的';
+    else if (raw.charAt(0) !== '{') why = '开头不是 {，而是「' + head + '…」';
+    else if (raw.charAt(raw.length - 1) !== '}') why = '结尾不是 }，最后是「…' + tail + '」——<b>多半是复制时被截断了</b>';
+    else why = '中间有损坏（' + String(e.message).slice(0, 40) + '）';
+    $('#m2').innerHTML = '<span class="bad">读不出来</span>：' + why +
+      '<br><span class="tip">收到 ' + raw.length + ' 个字符。' +
+      '如果字符数明显少于导出时提示的数目，就是没复制全——' +
+      '改用「存成文件」再用「从文件选」，或分两次复制。</span>';
     return;
   }
   if (!o || o.t !== 'yishutang-backup' || !o.data || typeof o.data !== 'object') {
