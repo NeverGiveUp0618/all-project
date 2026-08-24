@@ -20,6 +20,13 @@ const dom = new JSDOM(html, {
     w.localStorage.setItem('wst_usage', JSON.stringify({ lrcourse: 99, fengshui: 50 }));
     w.localStorage.setItem('liuren_course_read', JSON.stringify({ L01: 100, L02: 95, L03: 40 }));
     w.localStorage.setItem('liuren_course_counts', JSON.stringify({ lesson: 25, planned: 25 }));
+    // 风水：STAT 里一度根本没有 fengshui，卡片永远空白
+    w.localStorage.setItem('guanshan_read', JSON.stringify({ 'A#1': 1, 'A#2': 1, 'B#1': 1 }));
+    w.localStorage.setItem('guanshan_srs', JSON.stringify({ k1: {}, k2: {}, k3: {}, k4: {} }));
+    // 八字日练
+    w.localStorage.setItem('bazi_cat_stats', JSON.stringify({ 财: { a: 20, e: 4 } }));
+    // ⚠️ 陈旧缓存：App 曾在数据没读出来时汇报过这句，被永久钉住
+    w.localStorage.setItem('yst_stat_bazi', JSON.stringify({ text: '尚未开始练习', at: 1 }));
   }
 });
 const d = dom.window.document;
@@ -41,6 +48,20 @@ setTimeout(() => {
   ok(on.length >= 1, `有 ${on.length} 张卡片显示了学习进度`);
   const lr = d.querySelector('.card[data-app="lrcourse"] .badge');
   ok(/读完 <b>2<\/b>\/25 课/.test(lr.innerHTML), '六壬课程读到 2/25（分母读 counts.lesson）');
+
+  console.log('\n== 看板读的是实时数据，不是陈旧缓存 ==');
+  {
+    const fs = d.querySelector('.card[data-app="fengshui"] .badge');
+    ok(/读完 <b>3<\/b> 篇/.test(fs.innerHTML) && /知识点 <b>4<\/b> 条/.test(fs.innerHTML),
+       '风水卡显示进度（STAT 里一度漏了 fengshui，从来没显示过）');
+    const bz = d.querySelector('.card[data-app="bazi"] .badge');
+    // yst_stat_bazi 里钉着「尚未开始练习」，实时算得出来就必须盖过它
+    ok(/已练 <b>20<\/b> 题/.test(bz.innerHTML),
+       '八字日练显示实时的 20 题，没被陈旧缓存「尚未开始练习」顶掉');
+    // ⚠️ 只查 badge：整页 innerHTML 会扫到 <script> 里的注释，那不算显示出来
+    const badges = [...d.querySelectorAll('.card .badge')].map(b => b.innerHTML).join('|');
+    ok(!/尚未|暂无|还没/.test(badges), '徽章里不出现「尚未开始」这类占位文本');
+  }
 
   console.log('\n== 两处 App 名一致 ==');
   const names = [...html.matchAll(/(\w+):'([^']+)'/g)].filter(m => keys.includes(m[1]));

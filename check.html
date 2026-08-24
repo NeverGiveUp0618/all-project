@@ -84,6 +84,28 @@ if (!ls) {
     ['六壬神课', function () {
       var w = J('lr_weak', {}); var n = Object.keys(w).length;
       return n ? n + ' 条记录' : '';
+    }],
+    ['风水识形', function () {
+      var rd = J('guanshan_read', {}), srs = J('guanshan_srs', {});
+      var n = 0; for (var k in rd) if (rd[k]) n++;
+      var m = Object.keys(srs).length;
+      return (n || m) ? (n + ' 篇读过 · ' + m + ' 个知识点') : '';
+    }],
+    ['择日学习', function () {
+      var w = J('zeri_wrong_v1', []), st = J('zeri_streak_v1', {});
+      var p = [];
+      if (w && w.length) p.push('错题 ' + w.length);
+      if (st && +st.days > 0) p.push('连续 ' + st.days + ' 天');
+      return p.join(' · ');
+    }],
+    ['杨公背诵', function () {
+      var s2 = J('yangpu', {}); var n = Object.keys(s2).length;
+      return n ? n + ' 本有记录' : '';
+    }],
+    ['象义随身', function () {
+      var pre = 'bazi_xiangyi_mobile_v2__', c = 0;
+      for (var i = 0; i < ls.length; i++) if ((ls.key(i) || '').indexOf(pre) === 0) c++;
+      return c ? c + ' 项记录' : '';
     }]
   ];
   var t = document.getElementById('apps'), any = false;

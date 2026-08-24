@@ -338,6 +338,17 @@
       var n=+c.lesson||3, all=+c.planned||25;
       return done ? '读完 <b>'+done+'</b>/'+n+' 课 · 全书 '+all+' 课' : null;
     },
+    // 风水识形(fengshui):guanshan_read {条目key:1} 已读; guanshan_srs {知识点id:{reviews}} 复习记录
+    // ⚠️ 这一条 2026-08-24 才补——此前 STAT 里根本没有 fengshui,风水卡的进度从来就没显示过,
+    //    不是数据丢了。NAMES 里有它、STAT 里没有,加卡片时漏掉的。
+    fengshui:function(){
+      var rd=J('guanshan_read',{}),srs=J('guanshan_srs',{}),p=[];
+      var n=0; for(var k in rd){ if(rd[k]) n++; }
+      var m=Object.keys(srs).length;
+      if(n) p.push('读完 <b>'+n+'</b> 篇');
+      if(m) p.push('知识点 <b>'+m+'</b> 条');
+      return p.length ? p.join(' · ') : null;
+    },
     // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录
     xiangfa:function(){
       var pre='bazi_xiangyi_mobile_v2__',c=0;
@@ -350,7 +361,14 @@
   var cards=[].slice.call(document.querySelectorAll('.card'));
   cards.forEach(function(c){
     var appKey=c.getAttribute('data-app'),f=STAT[appKey]; if(!f) return;
-    var t=null,cached=J('yst_stat_'+appKey,null);try{t=cached&&cached.text?cached.text:f();}catch(e){t=null;}
+    // ⚠️ 2026-08-24 修：原来是「缓存优先」——App 用 postMessage 汇报的文本一旦存进
+    //    yst_stat_*，看板就再也不实时算了。而有的 App 在数据还没读出来时会汇报
+    //    「尚未开始练习」，那句话就被永久钉住，之后练多少都显示它，看着就像进度没了。
+    //    正确的优先级：**先实时算**（同域直接读得到，永远准确），
+    //    算不出来（App 换了存储键、或数据存在别处）才退回缓存。
+    var t=null,cached=J('yst_stat_'+appKey,null);
+    try{ t=f(); }catch(e){ t=null; }
+    if(!t && cached && cached.text && !/^(尚未|暂无|还没)/.test(cached.text)) t=cached.text;
     if(t){ var b=c.querySelector('.badge'); b.innerHTML=t; b.className='badge on'; }
   });
 
