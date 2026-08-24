@@ -157,9 +157,14 @@ var payload = '';
 $('#gen').onclick = function () {
   if (!ls) return;
   var keys = allKeys(), data = {};
-  keys.forEach(function (k) { data[k] = ls.getItem(k); });
+  // ⚠️ 别直接存字符串：那样每个 " 都会被转义成 \"，整份备份凭空胖 13%。
+  //    能解析成对象的就存对象，恢复时再 stringify 回去。
+  keys.forEach(function (k) {
+    var v = ls.getItem(k);
+    try { data[k] = JSON.parse(v); } catch (e) { data[k] = v; }
+  });
   payload = JSON.stringify({
-    t: 'yishutang-backup', v: 1,
+    t: 'yishutang-backup', v: 2,
     at: new Date().toISOString().slice(0, 19).replace('T', ' '),
     host: location.host, n: keys.length, data: data
   });
@@ -224,23 +229,67 @@ function fromB64(b) {
   return decodeURIComponent(escape(atob(t)));
 }
 
+/* ⭐ gzip：实测一份重度使用的数据 base64 要 45000 字符（链接塞不下），
+   gzip 后只要 6300 字符——省 86%，这才让"发链接"这条路真正可用。
+   CompressionStream 是浏览器原生的，老 webview 没有就退回不压缩。 */
+function gzipB64(str) {
+  if (typeof CompressionStream === 'undefined' || typeof Blob === 'undefined') {
+    return Promise.resolve(null);
+  }
+  try {
+    var st = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));
+    return new Response(st).arrayBuffer().then(function (buf) {
+      var u = new Uint8Array(buf), bin = '';
+      // 一次转几千个，别用 apply 一把梭——大数组会爆栈
+      for (var i = 0; i < u.length; i += 8192) {
+        bin += String.fromCharCode.apply(null, u.subarray(i, i + 8192));
+      }
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }).catch(function () { return null; });
+  } catch (e) { return Promise.resolve(null); }
+}
+function ungzipB64(b) {
+  if (typeof DecompressionStream === 'undefined') return Promise.resolve(null);
+  try {
+    var t = b.replace(/-/g, '+').replace(/_/g, '/');
+    while (t.length % 4) t += '=';
+    var bin = atob(t), u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    var st = new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return new Response(st).text().catch(function () { return null; });
+  } catch (e) { return Promise.resolve(null); }
+}
+
+var FRAG = 3000;   // 每片的数据长度；再长有的聊天软件就开始截断了
+
 $('#link').onclick = function () {
   if (!payload) return;
-  var url;
-  try {
-    url = location.origin + location.pathname + '#r=' + toB64(payload);
-  } catch (e) {
-    $('#m1').innerHTML = '<span class="bad">这个浏览器生成不了链接</span>，请用「复制」。';
-    return;
-  }
-  $('#out').value = url;
-  var n = url.length;
-  var warn = n > 8000
-    ? '<br><span class="warn">⚠️ 链接很长（' + n + ' 字符），有的聊天软件会截断。' +
-      '发过去之后<b>务必点开试一次</b>，不行就改用「存成文件」。</span>'
-    : '';
-  $('#m1').innerHTML = '<span class="ok">已生成恢复链接</span>（' + n + ' 字符）。' +
-    '<b>把它发给自己，在新手机上点开就会自动恢复</b>，不用复制粘贴。' + warn;
+  $('#m1').textContent = '正在压缩…';
+  gzipB64(payload).then(function (z) {
+    var body, tag;
+    if (z) { body = z; tag = 'z'; }
+    else { body = toB64(payload); tag = 'r'; }      // 压不了就退回原样
+    var base = location.origin + location.pathname;
+    if (body.length <= FRAG) {
+      var url = base + '#' + tag + '=' + body;
+      $('#out').value = url;
+      $('#m1').innerHTML = '<span class="ok">已生成恢复链接</span>（' + url.length + ' 字符' +
+        (z ? '，已压缩 ' + Math.round((1 - z.length / toB64(payload).length) * 100) + '%' : '') +
+        '）。<b>发给自己，新手机点开就自动恢复</b>。';
+      return;
+    }
+    // 太大就切片：每条链接一片，按顺序点开，集齐自动合并
+    var parts = [], i;
+    for (i = 0; i < body.length; i += FRAG) parts.push(body.slice(i, i + FRAG));
+    var urls = parts.map(function (p, k) {
+      return base + '#' + tag + '=' + (k + 1) + '/' + parts.length + ',' + p;
+    });
+    $('#out').value = urls.join('\n\n');
+    $('#m1').innerHTML = '<span class="ok">数据较多，切成了 ' + parts.length + ' 条链接</span>' +
+      (z ? '（已压缩 ' + Math.round((1 - z.length / toB64(payload).length) * 100) + '%）' : '') +
+      '。<b>把这 ' + parts.length + ' 条全发给自己，在新手机上一条条点开</b>——' +
+      '点完最后一条就会自动拼好，中间顺序错了也不要紧。';
+  });
 };
 
 $('#dl').onclick = function () {
@@ -268,18 +317,59 @@ $('#fi').onchange = function () {
 };
 
 /* 点开恢复链接进来：把数据填好并直接走恢复流程，不让人再手动粘一次 */
+/* 点开恢复链接进来。三种形态：
+     #r=xxx          未压缩、单条
+     #z=xxx          gzip、单条
+     #z=2/5,xxx      gzip、第 2 片（共 5 片）——分片暂存在 localStorage，集齐自动合并 */
+var FRAG_KEY = '_yst_frag';
 (function () {
   var h = location.hash || '';
-  if (h.indexOf('#r=') !== 0) return;
-  var raw;
-  try { raw = fromB64(h.slice(3)); } catch (e) {
-    $('#m2').innerHTML = '<span class="bad">这个恢复链接是坏的</span>——多半是发送时被截断了。';
-    return;
+  var m = /^#([rz])=(.*)$/.exec(h);
+  if (!m) return;
+  var tag = m[1], body = m[2];
+  var fm = /^(\d+)\/(\d+),([\s\S]*)$/.exec(body);
+
+  if (fm) {
+    var idx = +fm[1], total = +fm[2], part = fm[3];
+    var box = {};
+    try { box = JSON.parse(ls.getItem(FRAG_KEY) || '{}'); } catch (e) {}
+    if (box.total !== total || box.tag !== tag) box = { total: total, tag: tag, parts: {} };
+    box.parts[idx] = part;
+    try { ls.setItem(FRAG_KEY, JSON.stringify(box)); } catch (e) {}
+    var have = Object.keys(box.parts).length;
+    if (have < total) {
+      var miss = [];
+      for (var i = 1; i <= total; i++) if (!box.parts[i]) miss.push(i);
+      $('#m2').innerHTML = '<span class="ok">已收到第 ' + idx + ' 片</span>（' + have + '/' + total +
+        '）。<b>还差第 ' + miss.join('、') + ' 片</b>，把剩下的链接也点开。';
+      return;
+    }
+    body = '';
+    for (var j = 1; j <= total; j++) body += box.parts[j];
+    try { ls.removeItem(FRAG_KEY); } catch (e) {}   // 拼好就把碎片清掉，别占地方
   }
-  $('#in').value = raw;
-  $('#m2').innerHTML = '<span class="ok">从链接读到了备份</span>，点下面的「恢复」写入本机。';
-  // 滚到导入区，免得人找不着
-  try { $('#imp').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+
+  function done(raw) {
+    if (!raw) {
+      $('#m2').innerHTML = '<span class="bad">这个恢复链接是坏的</span>——多半是发送时被截断了。';
+      return;
+    }
+    $('#in').value = raw;
+    $('#m2').innerHTML = '<span class="ok">从链接读到了备份</span>，点下面的「恢复」写入本机。';
+    try { $('#imp').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+  }
+  if (tag === 'z') {
+    $('#m2').textContent = '正在解压…';
+    ungzipB64(body).then(function (t) {
+      if (t) return done(t);
+      $('#m2').innerHTML = '<span class="bad">这个浏览器解不开压缩包</span>——' +
+        '请在导出的那台手机上改用「复制」或「存成文件」。';
+    });
+  } else {
+    var raw = null;
+    try { raw = fromB64(body); } catch (e) {}
+    done(raw);
+  }
 })();
 
 $('#imp').onclick = function () {
@@ -324,7 +414,12 @@ $('#imp').onclick = function () {
   var n = 0, bad = 0;
   keys.forEach(function (k) {
     if (SKIP.test(k)) return;            // 备份里若混进缓存键，恢复时照样跳过
-    try { ls.setItem(k, String(o.data[k])); n++; } catch (e) { bad++; }
+    try {
+      var v = o.data[k];
+      // v2 起 value 存的是对象（省转义），v1 存的是字符串——两种都要吃得下
+      ls.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
+      n++;
+    } catch (e) { bad++; }
   });
   render();
   $('#m2').innerHTML = '<span class="ok">已恢复 ' + n + ' 项</span>' +
