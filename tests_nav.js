@@ -68,6 +68,40 @@ setTimeout(() => {
   ok(names.length === 8, 'index.html 的 NAMES 覆盖 8 个 App');
   ok(names.every(m => new RegExp(m[1] + '\\s*:\\s*\\{u:').test(view)), 'view.html 的 APP 表也都有');
 
+  console.log('\n== 进度备份 ==');
+  {
+    const fs2 = require('fs'), path2 = require('path');
+    const bh = fs2.readFileSync(path2.join(__dirname, 'backup.html'), 'utf8');
+    ok(/backup\.html/.test(html), '导航页有备份入口');
+    // ⚠️ 看板缓存不能进备份：带到新设备会把旧文本钉住，正是这次要修的毛病
+    ok(/yst_stat_/.test(bh) && /SKIP/.test(bh), '备份排除了 yst_stat_ 看板缓存');
+    ok(/yishutang-backup/.test(bh), '备份文件带类型标记，能挡住别家的 json');
+    ok(/window\.confirm/.test(bh), '覆盖前要用户确认（恢复不可逆）');
+    // 真跑一遍：甲机导出 → 乙机导入
+    const { JSDOM: J2 } = require('jsdom');
+    const A = new J2(bh, { runScripts: 'dangerously', url: 'https://x.io/a/backup.html',
+      beforeParse(w) { w.localStorage.setItem('bazi_cat_stats', JSON.stringify({ 财: { a: 20 } })); } });
+    setTimeout(() => {
+      A.window.document.getElementById('gen').click();
+      const bak = A.window.document.getElementById('out').value;
+      const B = new J2(bh, { runScripts: 'dangerously', url: 'https://x.io/b/backup.html' });
+      setTimeout(() => {
+        const w = B.window, doc = w.document;
+        w.confirm = () => true;
+        doc.getElementById('in').value = bak;
+        doc.getElementById('imp').click();
+        ok(w.localStorage.getItem('bazi_cat_stats') === JSON.stringify({ 财: { a: 20 } }),
+           '导出→导入后数据一致（跨设备恢复走得通）');
+        doc.getElementById('in').value = '不是备份';
+        doc.getElementById('imp').click();
+        ok(/不是备份/.test(doc.getElementById('m2').textContent), '乱粘贴会被挡下');
+        console.log(`\n${fail ? '✗' : '✓'} 通过 ${pass} 项，失败 ${fail} 项`);
+        process.exit(fail ? 1 : 0);
+      }, 250);
+    }, 250);
+    return;
+  }
+
   console.log(`\n${fail ? '✗' : '✓'} 通过 ${pass} 项，失败 ${fail} 项`);
   process.exit(fail ? 1 : 0);
 }, 300);

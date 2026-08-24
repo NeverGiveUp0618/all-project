@@ -1,6 +1,7 @@
-const CACHE = 'mingli-home-v19-dashfix';
+const CACHE = 'mingli-home-v20-backup';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
-                './icon180.png', './icon192.png', './icon512.png'];
+                './icon180.png', './icon192.png', './icon512.png',
+                './backup.html', './check.html'];
 
 self.addEventListener('install', e => {
   // ⚠️ addAll 必须兜底：任何一个资源取不到都会让 install 失败，

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>进度备份 · 易术堂</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg0:#05070f; --bg1:#0a1020;
+    --gold:#d9b877; --gold-hi:#f4e6be; --gold-lo:#9a7d43;
+    --cyan:#8fd3e0; --ink:#e9edf8; --ink-dim:#8a94ac;
+    --line:rgba(217,184,119,.26);
+    --panel:rgba(14,20,36,.55);
+    --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;padding:18px 16px calc(28px + var(--safe-b));
+    background:radial-gradient(120% 80% at 50% 0%,var(--bg1) 0%,var(--bg0) 70%) fixed;
+    color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    min-height:100vh}
+  a{color:var(--cyan);text-decoration:none}
+  h1{font-size:19px;margin:0 0 2px;letter-spacing:.06em;color:var(--gold-hi)}
+  .sub{color:var(--ink-dim);font-size:12.5px;margin-bottom:18px;line-height:1.7}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px;margin-bottom:14px}
+  .panel h2{font-size:14px;margin:0 0 4px;color:var(--gold);letter-spacing:.08em}
+  .tip{font-size:12px;color:var(--ink-dim);line-height:1.8;margin:6px 0 0}
+  .btn{display:inline-block;padding:10px 16px;border-radius:9px;border:1px solid var(--line);
+    background:rgba(217,184,119,.1);color:var(--gold-hi);font-size:14px;font-family:inherit;
+    cursor:pointer;margin:8px 8px 0 0}
+  .btn:active{background:rgba(217,184,119,.22)}
+  .btn.main{background:rgba(143,211,224,.14);border-color:rgba(143,211,224,.4);color:var(--cyan)}
+  .btn[disabled]{opacity:.4}
+  textarea{width:100%;min-height:110px;margin-top:10px;padding:10px;border-radius:9px;
+    border:1px solid var(--line);background:rgba(5,7,15,.6);color:var(--ink);
+    font:11.5px/1.6 ui-monospace,Menlo,monospace;resize:vertical}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  td{padding:5px 2px;border-bottom:1px solid rgba(217,184,119,.12)}
+  td:last-child{text-align:right;color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .msg{margin-top:10px;font-size:13px;line-height:1.7;min-height:1.2em}
+  .ok{color:#7fd6a8}.bad{color:#ff8f8f}.warn{color:var(--gold)}
+  .foot{margin-top:26px;font-size:10.5px;letter-spacing:.2em;text-align:center;
+    color:rgba(138,148,172,.5)}
+</style>
+</head>
+<body>
+
+<h1>进度备份</h1>
+<div class="sub">
+  学习进度只存在<b>这台设备的这个浏览器</b>里，不上服务器、不跨设备同步。<br>
+  换手机、清缓存都会没——<b>换设备前先在这里导出，到新设备上导回去</b>。
+</div>
+
+<div class="panel">
+  <h2>本机现有的进度</h2>
+  <table id="list"></table>
+  <div class="msg" id="sum"></div>
+</div>
+
+<div class="panel">
+  <h2>① 导出</h2>
+  <p class="tip">点「生成备份」，下面会出现一段文本。<b>微信里就用「复制」</b>，然后发给自己（文件传输助手／收藏），换手机时再打开这个页面粘回去。</p>
+  <button class="btn main" id="gen">生成备份</button>
+  <button class="btn" id="copy" disabled>复制</button>
+  <button class="btn" id="dl" disabled>存成文件</button>
+  <textarea id="out" placeholder="备份文本会出现在这里" readonly></textarea>
+  <div class="msg" id="m1"></div>
+</div>
+
+<div class="panel">
+  <h2>② 导入</h2>
+  <p class="tip">把之前备份的文本<b>整段粘贴</b>到下面，再点「恢复」。默认是<b>合并</b>：只写回备份里有的项，本机其他数据不动。</p>
+  <textarea id="in" placeholder="在这里粘贴备份文本"></textarea>
+  <button class="btn main" id="imp">恢复</button>
+  <button class="btn" id="file">从文件选</button>
+  <input type="file" id="fi" accept=".json,.txt,application/json,text/plain" style="display:none">
+  <div class="msg" id="m2"></div>
+</div>
+
+<div class="foot">易 术 堂 &nbsp;·&nbsp; <a href="./">返回导航</a> &nbsp;·&nbsp; <a href="check.html">数据自检</a></div>
+
+<script>
+'use strict';
+var $ = function (s) { return document.querySelector(s); };
+var ls = null;
+try { ls = window.localStorage; } catch (e) {}
+
+/* ⚠️ 这些键不备份：
+   yst_stat_*  看板缓存，恢复后会自动重算，带过去反而会把旧文本钉住
+   wst_last/wst_usage  只是"上次打开的是哪个"，换设备没意义 */
+var SKIP = /^(yst_stat_|wst_last$|wst_usage$)/;
+
+/* 各 App 认哪些键——只用来在界面上分组显示，导出仍以实际存在的键为准，
+   将来 App 加了新键也不会漏备份。 */
+var APPS = [
+  ['八字日练',   /^bazi(_|$)(?!course_)/],
+  ['命理精讲',   /^bazi_course_/],
+  ['六壬课程',   /^liuren_course_/],
+  ['六壬神课',   /^(lr_|bfStoryDone)/],
+  ['风水识形',   /^guanshan_/],
+  ['择日学习',   /^zeri/],
+  ['杨公背诵',   /^yangpu/],
+  ['象义随身',   /^bazi_xiangyi_/]
+];
+
+function allKeys() {
+  var out = [];
+  if (!ls) return out;
+  for (var i = 0; i < ls.length; i++) {
+    var k = ls.key(i);
+    if (k && !SKIP.test(k)) out.push(k);
+  }
+  return out.sort();
+}
+
+function bytes(n) { return n < 1024 ? n + ' 字' : (n / 1024).toFixed(1) + ' KB'; }
+
+function render() {
+  var t = $('#list');
+  if (!ls) {
+    t.innerHTML = '<tr><td class="bad">这个浏览器禁止了本地存储（无痕模式？），读不到也存不了</td></tr>';
+    return;
+  }
+  var keys = allKeys(), used = {}, rows = '', total = 0;
+  APPS.forEach(function (a) {
+    var n = 0, size = 0;
+    keys.forEach(function (k) {
+      if (used[k]) return;
+      // ⚠️ 「八字日练」的规则要排掉 bazi_course_ 与 bazi_xiangyi_，先让更专的规则占位
+      if (a[1].test(k)) { used[k] = 1; n++; size += (ls.getItem(k) || '').length; }
+    });
+    total += size;
+    if (n) rows += '<tr><td>' + a[0] + '</td><td>' + bytes(size) + '</td></tr>';
+  });
+  var rest = keys.filter(function (k) { return !used[k]; });
+  if (rest.length) {
+    var rs = 0; rest.forEach(function (k) { rs += (ls.getItem(k) || '').length; });
+    total += rs;
+    rows += '<tr><td>其他</td><td>' + bytes(rs) + '</td></tr>';
+  }
+  t.innerHTML = rows || '<tr><td class="bad">一项都没有</td></tr>';
+  $('#sum').innerHTML = keys.length
+    ? '共 <b>' + keys.length + '</b> 项，' + bytes(total) + '。'
+    : '<span class="bad">本机在这个网址下没有任何学习数据。</span>';
+}
+
+/* 更专的规则要先匹配，否则 bazi_course_* 会被「八字日练」的规则先吃掉 */
+APPS.sort(function (a, b) { return b[1].source.length - a[1].source.length; });
+render();
+
+var payload = '';
+$('#gen').onclick = function () {
+  if (!ls) return;
+  var keys = allKeys(), data = {};
+  keys.forEach(function (k) { data[k] = ls.getItem(k); });
+  payload = JSON.stringify({
+    t: 'yishutang-backup', v: 1,
+    at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    host: location.host, n: keys.length, data: data
+  });
+  $('#out').value = payload;
+  $('#copy').disabled = $('#dl').disabled = !payload;
+  $('#m1').innerHTML = '<span class="ok">已生成</span>：' + keys.length + ' 项，' +
+    bytes(payload.length) + '。<b>请把下面这段文本整段复制保存</b>。';
+};
+
+$('#copy').onclick = function () {
+  if (!payload) return;
+  var el = $('#out');
+  el.removeAttribute('readonly'); el.focus(); el.select();
+  el.setSelectionRange(0, payload.length);   // iOS 上 select() 不够，要显式设范围
+  var done = false;
+  try { done = document.execCommand('copy'); } catch (e) {}
+  el.setAttribute('readonly', 'readonly');
+  if (!done && navigator.clipboard) {
+    navigator.clipboard.writeText(payload).then(function () {
+      $('#m1').innerHTML = '<span class="ok">已复制</span>，去发给自己保存。';
+    }, function () {
+      $('#m1').innerHTML = '<span class="warn">复制没成功</span>——请长按上面的文本框全选后手动复制。';
+    });
+    return;
+  }
+  $('#m1').innerHTML = done
+    ? '<span class="ok">已复制</span>，去发给自己保存。'
+    : '<span class="warn">复制没成功</span>——请长按上面的文本框全选后手动复制。';
+};
+
+$('#dl').onclick = function () {
+  if (!payload) return;
+  // ⚠️ 微信内置浏览器多半拦下载，所以这只是加分项，复制才是主力
+  try {
+    var b = new Blob([payload], { type: 'application/json' });
+    var u = URL.createObjectURL(b), a = document.createElement('a');
+    a.href = u; a.download = '易术堂进度-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 3000);
+    $('#m1').innerHTML = '已触发下载。<b>微信里多半不给下</b>，那就用「复制」。';
+  } catch (e) {
+    $('#m1').innerHTML = '<span class="warn">这个浏览器不支持下载</span>，请用「复制」。';
+  }
+};
+
+$('#file').onclick = function () { $('#fi').click(); };
+$('#fi').onchange = function () {
+  var f = this.files && this.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function () { $('#in').value = String(r.result || ''); $('#m2').textContent = '已读入文件，点「恢复」。'; };
+  r.readAsText(f);
+};
+
+$('#imp').onclick = function () {
+  if (!ls) return;
+  var raw = $('#in').value.trim();
+  if (!raw) { $('#m2').innerHTML = '<span class="bad">先粘贴备份文本</span>'; return; }
+  var o;
+  try { o = JSON.parse(raw); } catch (e) {
+    $('#m2').innerHTML = '<span class="bad">这段文本不是备份</span>——要整段粘贴，别漏了开头的 { 或结尾的 }。';
+    return;
+  }
+  if (!o || o.t !== 'yishutang-backup' || !o.data || typeof o.data !== 'object') {
+    $('#m2').innerHTML = '<span class="bad">这不是易术堂的备份文件</span>';
+    return;
+  }
+  var keys = Object.keys(o.data);
+  if (!keys.length) { $('#m2').innerHTML = '<span class="bad">这份备份是空的</span>'; return; }
+  // 覆盖是不可逆的，先让人看清楚要写多少、其中多少会盖掉现有的
+  var over = keys.filter(function (k) { return ls.getItem(k) !== null; }).length;
+  var msg = '这份备份导出于 ' + (o.at || '未知时间') + '，共 ' + keys.length + ' 项。\n' +
+    (over ? '其中 ' + over + ' 项本机已有，会被覆盖。\n' : '') + '确定恢复吗？';
+  if (!window.confirm(msg)) { $('#m2').textContent = '已取消，什么都没动。'; return; }
+  var n = 0, bad = 0;
+  keys.forEach(function (k) {
+    if (SKIP.test(k)) return;            // 备份里若混进缓存键，恢复时照样跳过
+    try { ls.setItem(k, String(o.data[k])); n++; } catch (e) { bad++; }
+  });
+  render();
+  $('#m2').innerHTML = '<span class="ok">已恢复 ' + n + ' 项</span>' +
+    (bad ? '，<span class="bad">' + bad + ' 项写不进去（存储空间不足？）</span>' : '') +
+    '。<b><a href="./">回导航看看</a></b>';
+};
+</script>
+</body>
+</html>
