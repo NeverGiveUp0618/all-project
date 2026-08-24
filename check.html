@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数据自检 · 五术堂</title>
+<style>
+body{margin:0;padding:16px;background:#0E1116;color:#E8E6E3;
+  font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+h1{font-size:18px;margin:0 0 4px}
+.sub{color:#8A93A6;font-size:12.5px;margin-bottom:16px}
+.box{background:#161B24;border:1px solid #242C3A;border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.big{font-size:26px;font-weight:700}
+.ok{color:#5CD6A0}.bad{color:#FF7A7A}.warn{color:#F0C24B}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{padding:6px 4px;border-bottom:1px solid #242C3A;vertical-align:top}
+td:first-child{color:#8A93A6;white-space:nowrap;padding-right:10px}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.k{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#7FB3FF;word-break:break-all}
+.hint{font-size:12.5px;color:#8A93A6;margin-top:6px;line-height:1.75}
+</style>
+</head>
+<body>
+<h1>数据自检</h1>
+<div class="sub" id="host"></div>
+
+<div class="box">
+  <div>本机在这个网址下存了 <span class="big" id="n">—</span> 项数据</div>
+  <div class="hint" id="verdict"></div>
+</div>
+
+<div class="box">
+  <div style="margin-bottom:8px;font-weight:600">各 App 的进度</div>
+  <table id="apps"></table>
+</div>
+
+<div class="box">
+  <div style="margin-bottom:8px;font-weight:600">全部数据项（原样）</div>
+  <table id="all"></table>
+  <div class="hint">⚠️ 学习进度存在**这台设备的这个浏览器**里，不上传服务器、不跨设备同步。换手机、换浏览器、用无痕模式、或清理了浏览器站点数据，都会看不到。</div>
+</div>
+
+<script>
+document.getElementById('host').textContent = location.origin + location.pathname;
+var ls;
+try { ls = window.localStorage; } catch (e) { ls = null; }
+
+if (!ls) {
+  document.getElementById('verdict').innerHTML =
+    '<span class="bad">这个浏览器禁止了本地存储</span>——无痕模式或隐私设置会这样，进度存不住也读不出。';
+  document.getElementById('n').textContent = '读不到';
+} else {
+  var keys = [];
+  for (var i = 0; i < ls.length; i++) keys.push(ls.key(i));
+  keys.sort();
+  document.getElementById('n').textContent = keys.length;
+  var v = document.getElementById('verdict');
+  if (!keys.length) {
+    v.innerHTML = '<span class="bad">一项都没有</span>——这个网址下的本地数据是空的。' +
+      '常见原因：换了浏览器或设备、用了无痕模式、清理过浏览器的站点数据。' +
+      '<br>⚠️ 本地数据被清掉后<b>无法从代码里恢复</b>。';
+  } else {
+    v.innerHTML = '<span class="ok">数据在</span>——下面列的就是本机存着的内容。';
+  }
+
+  // 各 App 的口径与 index.html 的看板一致
+  function J(k, d) { try { return JSON.parse(ls.getItem(k)) || d; } catch (e) { return d; } }
+  var rows = [
+    ['八字日练', function () {
+      var s = J('bazi_cat_stats', {}), a = 0;
+      for (var k in s) a += (s[k].a || 0);
+      return a ? a + ' 题' : '';
+    }],
+    ['命理精讲', function () {
+      var r = J('bazi_course_read', {}), q = J('bazi_course_seen', {});
+      var n = Object.keys(r).length, m = Object.keys(q).length;
+      return (n || m) ? (n + ' 篇读过 · ' + m + ' 例做过') : '';
+    }],
+    ['六壬课程', function () {
+      var r = J('liuren_course_read', {}), q = J('liuren_course_qseen', {});
+      var n = Object.keys(r).length, m = Object.keys(q).length;
+      return (n || m) ? (n + ' 课读过 · ' + m + ' 例看过') : '';
+    }],
+    ['六壬神课', function () {
+      var w = J('lr_weak', {}); var n = Object.keys(w).length;
+      return n ? n + ' 条记录' : '';
+    }]
+  ];
+  var t = document.getElementById('apps'), any = false;
+  rows.forEach(function (r) {
+    var val = '';
+    try { val = r[1](); } catch (e) { val = ''; }
+    if (val) any = true;
+    t.innerHTML += '<tr><td>' + r[0] + '</td><td class="' + (val ? 'ok' : 'bad') + '">' +
+      (val || '无记录') + '</td></tr>';
+  });
+  if (!any && keys.length) {
+    t.innerHTML += '<tr><td colspan="2" class="warn">这几个 App 都没记录，' +
+      '但本机存着别的数据——多半是这些 App 还没在<b>这个浏览器</b>里用过。</td></tr>';
+  }
+
+  var a = document.getElementById('all');
+  if (!keys.length) a.innerHTML = '<tr><td class="bad">（空）</td></tr>';
+  keys.forEach(function (k) {
+    var raw = ls.getItem(k) || '';
+    a.innerHTML += '<tr><td class="k">' + k.replace(/</g, '&lt;') + '</td><td>' +
+      raw.length + ' 字</td></tr>';
+  });
+}
+</script>
+</body>
+</html>
