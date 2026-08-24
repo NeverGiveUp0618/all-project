@@ -104,22 +104,11 @@ setTimeout(() => {
         doc.getElementById('imp').click();
         ok(/已恢复/.test(doc.getElementById('m2').textContent), '带杂质的粘贴能自动清洗');
 
-        // ⭐ 恢复链接：微信里复制长文本不可靠，这条路才是主力
-        A.window.document.getElementById('link').click();
-        const url = A.window.document.getElementById('out').value;
-        ok(/#r=/.test(url) && url.length > 60, '能生成恢复链接');
-        const C = new J2(bh, { runScripts: 'dangerously', url });
-        setTimeout(() => {
-          const cw = C.window, cd = cw.document;
-          ok(/从链接读到了备份/.test(cd.getElementById('m2').textContent), '点开链接自动读出备份');
-          cw.confirm = () => true;
-          cd.getElementById('imp').click();
-          const got = JSON.parse(cw.localStorage.getItem('bazi_cat_stats') || '{}');
-          ok(got['财'] && got['财'].a === 20, '经链接恢复后数据一致（中文键无损）');
-          console.log(`\n${fail ? '✗' : '✓'} 通过 ${pass} 项，失败 ${fail} 项`);
-          process.exit(fail ? 1 : 0);
-        }, 250);
-        return;
+        // ⚠️ 恢复链接的往返（gzip／分片／乱序拼合）放在 tests_backup.js 测——
+        //    那条路是异步的（要等 CompressionStream 压缩完），塞在这里只会把本文件搞乱。
+        ok(/id="link"/.test(bh), '有「生成恢复链接」按钮');
+        ok(/CompressionStream/.test(bh), '链接走 gzip 压缩（不压缩塞不下）');
+        ok(/FRAG/.test(bh), '超长会切成多条链接');
         console.log(`\n${fail ? '✗' : '✓'} 通过 ${pass} 项，失败 ${fail} 项`);
         process.exit(fail ? 1 : 0);
       }, 250);
