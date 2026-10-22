@@ -181,41 +181,35 @@
           <div class="badge"></div></div>
         <span class="no">贰</span><span class="arrow">&#8250;</span>
       </a>
-      <a class="card" data-app="liuren" href="view.html?app=liuren">
-        <div class="ic">壬</div>
-        <div class="txt"><div class="t-main">六壬神课</div><div class="t-sub">起课 · 九宗门 · 毕法速查</div>
-          <div class="badge"></div></div>
-        <span class="no">叁</span><span class="arrow">&#8250;</span>
-      </a>
       <a class="card" data-app="zeri" href="view.html?app=zeri">
         <div class="ic">日</div>
         <div class="txt"><div class="t-main">择日学习</div><div class="t-sub">查 · 算 · 学 三模式</div>
           <div class="badge"></div></div>
-        <span class="no">肆</span><span class="arrow">&#8250;</span>
+        <span class="no">叁</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="yangong" href="view.html?app=yangong">
         <div class="ic">山</div>
         <div class="txt"><div class="t-main">杨公背诵</div><div class="t-sub">五书口诀 · 易学图谱</div>
           <div class="badge"></div></div>
-        <span class="no">伍</span><span class="arrow">&#8250;</span>
+        <span class="no">肆</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="fengshui" href="view.html?app=fengshui">
         <div class="ic">峦</div>
         <div class="txt"><div class="t-main">风水识形</div><div class="t-sub">龙砂水穴 · 看图辨形 · 城市选宅</div>
           <div class="badge"></div></div>
-        <span class="no">陆</span><span class="arrow">&#8250;</span>
+        <span class="no">伍</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="jingjiang" href="view.html?app=jingjiang">
         <div class="ic">讲</div>
         <div class="txt"><div class="t-main">命理精讲</div><div class="t-sub">教材通读 · 命例题库 · 逐题拆解</div>
           <div class="badge"></div></div>
-        <span class="no">柒</span><span class="arrow">&#8250;</span>
+        <span class="no">陆</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="lrcourse" href="view.html?app=lrcourse">
         <div class="ic">课</div>
-        <div class="txt"><div class="t-main">六壬课程</div><div class="t-sub">依赖顺序 · 一课一课 · 起盘台</div>
+        <div class="txt"><div class="t-main">六壬课程</div><div class="t-sub">一课一课 · 起盘台 · 综合训练</div>
           <div class="badge"></div></div>
-        <span class="no">捌</span><span class="arrow">&#8250;</span>
+        <span class="no">柒</span><span class="arrow">&#8250;</span>
       </a>
     </main>
 
@@ -275,7 +269,7 @@
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
 // 同域共享 localStorage,直接读各App的真实存储键
 (function(){
-  var NAMES={bazi:'八字日练',xiangfa:'象义随身',liuren:'六壬神课',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形',jingjiang:'命理精讲',lrcourse:'六壬课程'};
+  var NAMES={bazi:'八字日练',xiangfa:'象义随身',zeri:'择日学习',yangong:'杨公背诵',fengshui:'风水识形',jingjiang:'命理精讲',lrcourse:'六壬课程'};
   function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
@@ -286,15 +280,7 @@
       for(var k in s){ var v=s[k]||{}; a+=+v.a||0; e+=+v.e||0; }
       return a ? '已练 <b>'+a+'</b> 题 · 正确率 <b>'+Math.round((a-e)/a*100)+'%</b>' : null;
     },
-    // lr_weak: {类目:{q:出题, w:错}} ——与 getWeakSpot() 一致:只看 q>=5,取错误率最高
-    liuren:function(){
-      var d=J('lr_weak',{}),best=null,br=-1;
-      for(var k in d){
-        var v=d[k]||{}, q=+v.q||0, w=+v.w||0;
-        if(q>=5){ var r=w/q; if(r>br){ br=r; best=k; } }
-      }
-      return (best&&br>0) ? '薄弱:<b>'+best+'</b> · 错误率 <b>'+Math.round(br*100)+'%</b>' : null;
-    },
+    // ⚠️ 六壬神课(liuren-game) 2026-10-22 退役并入六壬课程，卡片与看板已撤（旧 lr_* 数据仍在，备份页照常认）
     // zeri_wrong_v1: 错题Set; zeri_streak_v1: {last,days}
     // 注意:择日的日期格式不补零(2026-7-13);days是存量,断签不会清零 → 需自行判定是否仍连续
     zeri:function(){
@@ -340,7 +326,13 @@
       for(var k in r){ if((+r[k]||0)>=90) done++; }
       var c=J('liuren_course_counts',{});
       var n=+c.lesson||3, all=+c.planned||25;
-      return done ? '读完 <b>'+done+'</b>/'+n+' 课 · 全书 '+all+' 课' : null;
+      // 2026-10-22 起课程里有了综合训练（原六壬神课的练习），做过题就一并显示
+      var t=J('liuren_course_train',{}).st||{},tn=0,tok=0;
+      for(var q in t){ tn+=+(t[q]||{}).n||0; tok+=+(t[q]||{}).ok||0; }
+      var p=[];
+      if(done) p.push('读完 <b>'+done+'</b>/'+n+' 课');
+      if(tn) p.push('练 <b>'+tn+'</b> 题 · 正确率 <b>'+Math.round(tok/tn*100)+'%</b>');
+      return p.length ? p.join(' · ') : null;
     },
     // 风水识形(fengshui):guanshan_read {条目key:1} 已读; guanshan_srs {知识点id:{reviews}} 复习记录
     // ⚠️ 这一条 2026-08-24 才补——此前 STAT 里根本没有 fengshui,风水卡的进度从来就没显示过,

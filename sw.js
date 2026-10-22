@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v22-gzip';
+const CACHE = 'mingli-home-v23-lrmerge';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
                 './backup.html', './check.html'];

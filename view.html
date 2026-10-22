@@ -99,7 +99,6 @@
   var APPS = {
     bazi:    {u:'https://nevergiveup0618.github.io/bazi-game/',       n:'八字日练',  g:'卦'},
     xiangfa: {u:'https://nevergiveup0618.github.io/bazi-xiangfa/',    n:'象义随身',  g:'象'},
-    liuren:  {u:'https://nevergiveup0618.github.io/liuren-game/',     n:'六壬神课',    g:'壬'},
     zeri:    {u:'https://nevergiveup0618.github.io/zeri/',            n:'择日学习',  g:'日'},
     yangong: {u:'https://nevergiveup0618.github.io/yangong-beisong/', n:'杨公背诵',  g:'山'},
     fengshui:{u:'https://nevergiveup0618.github.io/fengshui/',        n:'风水识形',  g:'峦'},
@@ -111,6 +110,7 @@
     return m ? decodeURIComponent(m[1]) : '';
   }
   var key = getParam('app');
+  if (key === 'liuren') key = 'lrcourse';   // 六壬神课 2026-10-22 退役并入六壬课程：旧书签/「继续上次」转过去
   var app = APPS[key];
 
   if(!app){ location.replace('./'); }
