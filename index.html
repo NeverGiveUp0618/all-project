@@ -207,7 +207,7 @@
       </a>
       <a class="card" data-app="lrcourse" href="view.html?app=lrcourse">
         <div class="ic">壬</div>
-        <div class="txt"><div class="t-main">六壬神课</div><div class="t-sub">一课一课 · 起盘台 · 综合训练</div>
+        <div class="txt"><div class="t-main">六壬神课</div><div class="t-sub">一课一课 · 起盘台 · 格局毕法</div>
           <div class="badge"></div></div>
         <span class="no">柒</span><span class="arrow">&#8250;</span>
       </a>
@@ -326,12 +326,8 @@
       for(var k in r){ if((+r[k]||0)>=90) done++; }
       var c=J('liuren_course_counts',{});
       var n=+c.lesson||3, all=+c.planned||25;
-      // 2026-10-22 起课程里有了综合训练（原六壬神课的练习），做过题就一并显示
-      var t=J('liuren_course_train',{}).st||{},tn=0,tok=0;
-      for(var q in t){ tn+=+(t[q]||{}).n||0; tok+=+(t[q]||{}).ok||0; }
       var p=[];
       if(done) p.push('读完 <b>'+done+'</b>/'+n+' 课');
-      if(tn) p.push('练 <b>'+tn+'</b> 题 · 正确率 <b>'+Math.round(tok/tn*100)+'%</b>');
       return p.length ? p.join(' · ') : null;
     },
     // 风水识形(fengshui):guanshan_read {条目key:1} 已读; guanshan_srs {知识点id:{reviews}} 复习记录
