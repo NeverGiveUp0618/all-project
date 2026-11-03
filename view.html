@@ -35,7 +35,13 @@
   .title{
     font-size:15.5px; letter-spacing:.22em; color:var(--ink); padding-left:.22em;
     max-width:44%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    display:flex; flex-direction:column; align-items:center; line-height:1.25;
   }
+  .title small{font-size:10.5px; letter-spacing:.06em; color:var(--ink-dim); font-variant-numeric:tabular-nums; padding-left:0; opacity:.75}
+  .title small::before{content:''; display:inline-block; width:5px; height:5px; border-radius:50%; background:currentColor; margin-right:5px; vertical-align:1px}
+  .title small.on{color:var(--gold-hi); opacity:1}
+  .title small.on::before{animation:clk 1.4s ease-in-out infinite}
+  @keyframes clk{50%{opacity:.25}}
   /* 切换模块 */
   .sw{
     position:absolute; right:6px; bottom:0; height:var(--barh);
@@ -84,7 +90,7 @@
 <body>
   <div class="bar">
     <a class="back" href="./" aria-label="返回首页"><span class="chev">&#8249;</span>返回首页</a>
-    <div class="title" id="title">易术堂</div>
+    <div class="title" id="title"><span id="tname">易术堂</span><small id="clk"></small></div>
     <button class="sw" id="sw" aria-label="切换模块">切换<span class="car">&#9660;</span></button>
   </div>
   <div class="mask" id="mask"></div>
@@ -115,7 +121,7 @@
 
   if(!app){ location.replace('./'); }
   else {
-    document.getElementById('title').textContent = app.n;
+    document.getElementById('tname').textContent = app.n;
     document.title = app.n + ' · 易术堂';
 
     // 记录使用次数与最近一次(供首页排序/继续上次)
@@ -138,8 +144,9 @@
     setTimeout(function(){ load.classList.add('hide'); }, 5000);  // 兜底
     f.src = app.u;
 
-    // 学习时长（2026-11-03）：套壳页在前台、且近 90 秒内有操作（本页或 iframe 里的点击/触摸/滚动/按键）才计时，
-    // 每 5 秒记一跳，累加到 localStorage.wst_time = {日期:{app:秒}}；首页「今日学习」读它。只统计从导航进入的使用。
+    // 学习时长（2026-11-03）：套壳页在前台、且近 90 秒内有操作（本页或 iframe 里的点击/触摸/滚动/按键）才计时。
+    // 每秒走一格（顶栏秒表），每满 5 秒落盘：localStorage.wst_time = {日期:{app:秒}}（首页今日学习/北斗连星读它）、
+    // wst_hour = {日期:{时辰序号0-11:秒}}（首页罗盘时辰环读它；子时=23-1点，序号0）。只统计从导航进入的使用。
     (function(){
       var last = Date.now(), IDLE = 90000, EV = ['touchstart','touchmove','pointerdown','scroll','keydown','wheel','click','mousemove'];
       function act(){ last = Date.now(); }
@@ -147,19 +154,32 @@
       function hook(){ try{ var w = f.contentWindow; EV.forEach(function(e){ w.addEventListener(e, act, {passive:true, capture:true}); }); }catch(x){} }
       f.addEventListener('load', hook);
       function ymd(){ var d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-      function add(sec){
+      function J(k){ try{ return JSON.parse(localStorage.getItem(k) || '{}') || {}; }catch(x){ return {}; } }
+      function trim(t){ var ks = Object.keys(t).sort(); while(ks.length > 90) delete t[ks.shift()]; }
+      var day = ymd(), total = 0, pend = 0, clk = document.getElementById('clk');
+      function load(){ var o = J('wst_time')[day] || {}, s = 0; for(var k in o) s += +o[k] || 0; total = s; }
+      function save(){
+        if(!pend) return;
         try{
-          var t = JSON.parse(localStorage.getItem('wst_time') || '{}'), k = ymd();
-          (t[k] = t[k] || {})[key] = (+t[k][key] || 0) + sec;
-          var ks = Object.keys(t).sort(); while(ks.length > 90) delete t[ks.shift()];   // 只留最近 90 天
-          localStorage.setItem('wst_time', JSON.stringify(t));
+          var t = J('wst_time'), h = J('wst_hour'), hr = (new Date().getHours() + 1) % 24 >> 1;
+          (t[day] = t[day] || {})[key] = (+t[day][key] || 0) + pend;
+          (h[day] = h[day] || {})[hr] = (+h[day][hr] || 0) + pend;
+          trim(t); trim(h);
+          localStorage.setItem('wst_time', JSON.stringify(t)); localStorage.setItem('wst_hour', JSON.stringify(h));
         }catch(x){}
+        pend = 0;
       }
+      function fmt(s){ var h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60, p = function(n){ return String(n).padStart(2,'0'); };
+        return h ? h+':'+p(m)+':'+p(x) : p(m)+':'+p(x); }
+      load();
       setInterval(function(){
-        if(document.visibilityState !== 'visible') return;
-        if(Date.now() - last > IDLE) return;
-        add(5);
-      }, 5000);
+        var d = ymd(); if(d !== day){ save(); day = d; load(); }
+        var on = document.visibilityState === 'visible' && Date.now() - last <= IDLE;
+        if(on){ total++; pend++; if(pend >= 5) save(); }
+        clk.textContent = '今日 ' + fmt(total); clk.className = on ? 'on' : '';
+      }, 1000);
+      document.addEventListener('visibilitychange', function(){ if(document.visibilityState !== 'visible') save(); });
+      window.addEventListener('pagehide', save);
     })();
 
     // 快速切换模块
