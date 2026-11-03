@@ -147,6 +147,30 @@
   @media (min-width:1400px){
     .grid{max-width:1500px;}
   }
+
+  /* 今日学习时长 */
+  .tm{margin:0 auto 18px;max-width:560px;padding:14px 16px 10px;border:1px solid var(--line);border-radius:16px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .tm-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+  .tm-k{display:block;font-size:12px;letter-spacing:.2em;color:var(--cyan-dim)}
+  .tm-big b{font-size:40px;line-height:1.1;font-weight:700;color:var(--gold-hi);font-family:"Noto Serif SC",Songti SC,serif;margin-right:4px}
+  .tm-u{font-size:13px;color:var(--ink-dim)}
+  .tm-side{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12px;color:var(--ink-dim)}
+  .tm-side b{color:var(--gold)}
+  .tm-bars{margin:10px 0 4px}
+  .tm-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px;color:var(--ink)}
+  .tm-row .nm{flex:0 0 4.6em;color:var(--ink-dim)}
+  .tm-row .bar{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden}
+  .tm-row .bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi))}
+  .tm-row .mn{flex:0 0 3.4em;text-align:right;color:var(--gold)}
+  .tm-empty{margin:8px 0;font-size:12.5px;color:var(--ink-dim)}
+  .tm-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .tm-day{text-align:center;font-size:11px;color:var(--ink-dim)}
+  .tm-day .col{height:44px;display:flex;align-items:flex-end;justify-content:center}
+  .tm-day .col i{display:block;width:60%;min-height:2px;border-radius:3px 3px 0 0;background:var(--cyan-dim)}
+  .tm-day.today .col i{background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo))}
+  .tm-day .v{display:block;height:14px;line-height:14px;color:var(--ink)}
+  .tm-day.today{color:var(--gold)}
+  .tm-note{margin-top:8px;font-size:10.5px;color:var(--ink-dim);opacity:.7;text-align:center}
 </style>
 </head>
 <body>
@@ -167,6 +191,16 @@
     </div>
 
     <a class="cont" id="cont" href="#"><span class="k">继续</span><span id="cont-name"></span> &#8250;</a>
+
+    <section class="tm" id="tm" aria-label="今日学习时长">
+      <div class="tm-top">
+        <div class="tm-big"><span class="tm-k">今日学习</span><b id="tm-today">0</b><span class="tm-u" id="tm-unit">分钟</span></div>
+        <div class="tm-side"><span id="tm-week-total"></span><span id="tm-streak"></span></div>
+      </div>
+      <div class="tm-bars" id="tm-bars"></div>
+      <div class="tm-week" id="tm-week"></div>
+      <div class="tm-note">只统计从本导航进入、前台有操作的时间</div>
+    </section>
 
     <main class="grid" id="grid">
       <a class="card" data-app="bazi" href="view.html?app=bazi">
@@ -379,6 +413,45 @@
     el.href='view.html?app='+last;
     el.className='cont on';
   }
+})();
+
+
+// —— 今日学习时长（读 view.html 记的 wst_time）——
+(function(){
+  var NM={}; [].forEach.call(document.querySelectorAll('.card[data-app]'),function(c){var m=c.querySelector('.t-main'); if(m) NM[c.getAttribute('data-app')]=m.textContent.trim();});   // 名字取自卡片，不另写一份
+  function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function fmt(sec){var m=Math.floor(sec/60);return m>=60?Math.floor(m/60)+' 时 '+(m%60)+' 分':m+' 分';}
+  function render(){
+    var t={}; try{t=JSON.parse(localStorage.getItem('wst_time')||'{}')||{};}catch(e){}
+    var now=new Date(), tk=ymd(now), td=t[tk]||{}, tot=0, k;
+    for(k in td) tot+=+td[k]||0;
+    var min=Math.floor(tot/60);
+    var big=document.getElementById('tm-today'), unit=document.getElementById('tm-unit');
+    if(min>=60){big.textContent=Math.floor(min/60)+':'+String(min%60).padStart(2,'0');unit.textContent='小时';}
+    else if(tot>0&&min<1){big.textContent='<1';unit.textContent='分钟';}
+    else {big.textContent=min;unit.textContent='分钟';}
+    var rows=Object.keys(td).filter(function(a){return NM[a]&&td[a]>0;}).sort(function(a,b){return td[b]-td[a];});
+    var mx=rows.length?td[rows[0]]:1, bars=document.getElementById('tm-bars');
+    bars.innerHTML=rows.length?rows.map(function(a){
+      return '<div class="tm-row"><span class="nm">'+NM[a]+'</span><span class="bar"><i style="width:'+Math.max(4,Math.round(td[a]/mx*100))+'%"></i></span><span class="mn">'+(td[a]<60?'<1 分':fmt(td[a]))+'</span></div>';
+    }).join(''):'<div class="tm-empty">今天还没开始，点下面任一模块就会自动计时。</div>';
+    // 近 7 天
+    var days=[],wk=0,i,d,s,names='日一二三四五六',max=1;
+    for(i=6;i>=0;i--){d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);var o=t[ymd(d)]||{};s=0;for(k in o)s+=+o[k]||0;days.push({d:d,s:s});if(s>max)max=s;wk+=s;}
+    document.getElementById('tm-week').innerHTML=days.map(function(x,j){
+      var m=Math.round(x.s/60);
+      return '<div class="tm-day'+(j===6?' today':'')+'"><span class="v">'+(x.s?m:'')+'</span><div class="col"><i style="height:'+Math.round(x.s/max*100)+'%"></i></div>'+(j===6?'今':'周'+names[x.d.getDay()])+'</div>';
+    }).join('');
+    document.getElementById('tm-week-total').innerHTML='近 7 天 <b>'+fmt(wk)+'</b>';
+    // 连续天数：每天累计 ≥5 分钟算学了；今天还没到 5 分钟不断（从昨天往前数）
+    var streak=0,all=t;
+    for(i=0;i<90;i++){d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);var oo=all[ymd(d)]||{};s=0;for(k in oo)s+=+oo[k]||0;
+      if(s>=300)streak++; else if(i===0)continue; else break;}
+    document.getElementById('tm-streak').innerHTML=streak?'连续 <b>'+streak+'</b> 天':'';
+  }
+  render();
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')render();});
+  window.addEventListener('pageshow',render);
 })();
 
 if('serviceWorker' in navigator){

@@ -138,6 +138,30 @@
     setTimeout(function(){ load.classList.add('hide'); }, 5000);  // 兜底
     f.src = app.u;
 
+    // 学习时长（2026-11-03）：套壳页在前台、且近 90 秒内有操作（本页或 iframe 里的点击/触摸/滚动/按键）才计时，
+    // 每 5 秒记一跳，累加到 localStorage.wst_time = {日期:{app:秒}}；首页「今日学习」读它。只统计从导航进入的使用。
+    (function(){
+      var last = Date.now(), IDLE = 90000, EV = ['touchstart','touchmove','pointerdown','scroll','keydown','wheel','click','mousemove'];
+      function act(){ last = Date.now(); }
+      EV.forEach(function(e){ window.addEventListener(e, act, {passive:true, capture:true}); });
+      function hook(){ try{ var w = f.contentWindow; EV.forEach(function(e){ w.addEventListener(e, act, {passive:true, capture:true}); }); }catch(x){} }
+      f.addEventListener('load', hook);
+      function ymd(){ var d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+      function add(sec){
+        try{
+          var t = JSON.parse(localStorage.getItem('wst_time') || '{}'), k = ymd();
+          (t[k] = t[k] || {})[key] = (+t[k][key] || 0) + sec;
+          var ks = Object.keys(t).sort(); while(ks.length > 90) delete t[ks.shift()];   // 只留最近 90 天
+          localStorage.setItem('wst_time', JSON.stringify(t));
+        }catch(x){}
+      }
+      setInterval(function(){
+        if(document.visibilityState !== 'visible') return;
+        if(Date.now() - last > IDLE) return;
+        add(5);
+      }, 5000);
+    })();
+
     // 快速切换模块
     var menu = document.getElementById('menu'), sw = document.getElementById('sw'), mask = document.getElementById('mask');
     var html = '';
