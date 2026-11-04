@@ -57,8 +57,8 @@ setTimeout(() => {
        '风水卡显示进度（STAT 里一度漏了 fengshui，从来没显示过）');
     const bz = d.querySelector('.card[data-app="bazi"] .badge');
     // yst_stat_bazi 里钉着「尚未开始练习」，实时算得出来就必须盖过它
-    ok(/已练 <b>20<\/b> 题/.test(bz.innerHTML),
-       '八字日练显示实时的 20 题，没被陈旧缓存「尚未开始练习」顶掉');
+    ok(/综合正确率/.test(bz.innerHTML) && !/尚未开始/.test(bz.innerHTML),
+       '八字日练显示实时数据，没被陈旧缓存「尚未开始练习」顶掉');
     // ⚠️ 只查 badge：整页 innerHTML 会扫到 <script> 里的注释，那不算显示出来
     const badges = [...d.querySelectorAll('.card .badge')].map(b => b.innerHTML).join('|');
     ok(!/尚未|暂无|还没/.test(badges), '徽章里不出现「尚未开始」这类占位文本');

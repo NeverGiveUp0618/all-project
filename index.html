@@ -332,7 +332,8 @@
     bazi:function(){
       var s=J('bazi_cat_stats',{}),a=0,e=0;
       for(var k in s){ var v=s[k]||{}; a+=+v.a||0; e+=+v.e||0; }
-      return a ? '已练 <b>'+a+'</b> 题 · 正确率 <b>'+Math.round((a-e)/a*100)+'%</b>' : null;
+      var d=J('bazi',{}),tc=+d.totalCorrect||0,ds=+d.dayStreak||0;   // 与App首页同源：连续打卡=dayStreak，累计对题=totalCorrect
+      return (a||tc) ? '连续打卡 <b>'+ds+'</b> 天 · 累计对题 <b>'+tc+'</b>'+(a?' · 综合正确率 <b>'+Math.round((a-e)/a*100)+'%</b>':'') : null;
     },
     // ⚠️ 六壬神课(liuren-game) 2026-10-22 退役并入六壬课程，卡片与看板已撤（旧 lr_* 数据仍在，备份页照常认）
     // zeri_wrong_v1: 错题Set; zeri_streak_v1: {last,days}
