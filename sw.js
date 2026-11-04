@@ -1,7 +1,7 @@
-const CACHE = 'mingli-home-v29-bazistat';
+const CACHE = 'mingli-home-v30-guard';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
-                './backup.html', './check.html'];
+                './backup.html', './check.html', './guard.js'];
 
 self.addEventListener('install', e => {
   // ⚠️ addAll 必须兜底：任何一个资源取不到都会让 install 失败，

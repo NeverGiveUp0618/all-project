@@ -93,7 +93,7 @@ try { ls = window.localStorage; } catch (e) {}
 /* ⚠️ 这些键不备份：
    yst_stat_*  看板缓存，恢复后会自动重算，带过去反而会把旧文本钉住
    wst_last/wst_usage  只是"上次打开的是哪个"，换设备没意义 */
-var SKIP = /^(yst_stat_|wst_last$|wst_usage$)/;
+var SKIP = /^(yst_stat_|wst_last$|wst_usage$|yg_)/;
 
 /* 各 App 认哪些键——只用来在界面上分组显示，导出仍以实际存在的键为准，
    将来 App 加了新键也不会漏备份。 */
@@ -154,6 +154,7 @@ APPS.sort(function (a, b) { return b[1].source.length - a[1].source.length; });
 render();
 
 var payload = '';
+['copy','link','dl'].forEach(function (id) { $('#'+id).addEventListener('click', function () { try { localStorage.setItem('yg_export', String(Date.now())); } catch (e) {} }); });
 $('#gen').onclick = function () {
   if (!ls) return;
   var keys = allKeys(), data = {};

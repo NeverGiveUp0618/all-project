@@ -101,6 +101,7 @@
   </div>
   <div class="load" id="load">载 入 中…</div>
 
+<script src="guard.js"></script>
 <script>
   var APPS = {
     bazi:    {u:'https://nevergiveup0618.github.io/bazi-game/',       n:'八字日练',  g:'卦'},
@@ -142,7 +143,8 @@
     });
     f.addEventListener('load', function(){ load.classList.add('hide'); });
     setTimeout(function(){ load.classList.add('hide'); }, 5000);  // 兜底
-    f.src = app.u;
+    // 先等进度守护把本机镜像里缺的键补回来（最多等 1.5 秒），再载入模块，免得模块先读到空数据
+    Promise.race([(window.YG?YG.ready:Promise.resolve()), new Promise(function(r){setTimeout(r,1500);})]).then(function(){ f.src = app.u; });
 
     // 学习时长（2026-11-03）：套壳页在前台、且近 90 秒内有操作（本页或 iframe 里的点击/触摸/滚动/按键）才计时。
     // 每秒走一格（顶栏秒表），每满 5 秒落盘：localStorage.wst_time = {日期:{app:秒}}（首页今日学习/北斗连星读它）、
