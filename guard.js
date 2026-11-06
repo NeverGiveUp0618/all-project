@@ -113,5 +113,29 @@
   function markExport() { try { localStorage.setItem('yg_export', String(Date.now())); } catch (e) {} }
   function lastExport() { try { return +localStorage.getItem('yg_export') || 0; } catch (e) { return 0; } }
 
-  window.YG = { ready: ready, snapshot: snapshot, restore: restore, markExport: markExport, lastExport: lastExport };
+  // ④ 备份提示（2026-11-06）：在子站里学了 3 分钟、且 3 天没导出过 → 底部弹一条（每天最多一次；首页有自己的横幅，不重复）
+  function nudge(force) {
+    try {
+      if (document.getElementById('ygBar') || document.getElementById('ygNudge')) return false;
+      var day = Math.floor(Date.now() / 864e5), last = lastExport();
+      if (!force) {
+        if (last && Date.now() - last < 3 * 864e5) return false;
+        if (+localStorage.getItem('yg_nudge') === day) return false;
+        if (!Object.keys(localAll()).length) return false;
+      }
+      localStorage.setItem('yg_nudge', String(day));
+      var d = document.createElement('div'); d.id = 'ygNudge';
+      d.style.cssText = 'position:fixed;left:10px;right:10px;bottom:12px;z-index:99998;background:#3a2a12;color:#ffe2b0;border:1px solid #b9812c;border-radius:12px;padding:10px 12px;font:13px/1.5 sans-serif;display:flex;gap:10px;align-items:center;box-shadow:0 4px 18px rgba(0,0,0,.4)';
+      var days = last ? Math.floor((Date.now() - last) / 864e5) + ' 天没' : '还没';
+      d.innerHTML = '<span style="flex:1">学习进度' + days + '备份了。微信一清存储就可能全丢，花 10 秒导出一份吧。</span>' +
+        '<a href="https://nevergiveup0618.github.io/all-project/backup.html" style="color:#1b1304;background:#e0a94a;border-radius:8px;padding:6px 10px;text-decoration:none;white-space:nowrap">去备份</a>' +
+        '<a href="#" style="color:#c9a66b;text-decoration:none">稍后</a>';
+      d.lastChild.onclick = function (e) { e.preventDefault(); d.remove(); };
+      (document.body || document.documentElement).appendChild(d);
+      return true;
+    } catch (e) { return false; }
+  }
+  if (!/\/all-project\//.test(location.pathname)) setTimeout(function () { nudge(false); }, 180000);
+
+  window.YG = { nudge: nudge, ready: ready, snapshot: snapshot, restore: restore, markExport: markExport, lastExport: lastExport };
 })();
