@@ -560,7 +560,7 @@ if('serviceWorker' in navigator){
   function show(){
     var t=window.YG?YG.lastExport():0, d=t?Math.floor((Date.now()-t)/864e5):-1, has=false;
     try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/^(bazi|lr_|fs_|zeri|yg_beisong|kq_|jj_)/.test(k)||k==='bazi'){has=true;break;}}}catch(e){}
-    if(d>=0&&d<3)return;
+    if(d>=0&&d<15)return;
     el.style.display='block';
     el.innerHTML='⚠️ <b>学习进度只存在这部手机的微信里</b>，微信一清缓存就没了。'+(d<0?'你<b>还没备份过</b>。':'上次备份是 <b>'+d+' 天前</b>。')+' <a href="backup.html" style="color:#ffd9a3;font-weight:600">→ 现在去备份（30 秒）</a>';
   }

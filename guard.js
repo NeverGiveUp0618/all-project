@@ -113,13 +113,13 @@
   function markExport() { try { localStorage.setItem('yg_export', String(Date.now())); } catch (e) {} }
   function lastExport() { try { return +localStorage.getItem('yg_export') || 0; } catch (e) { return 0; } }
 
-  // ④ 备份提示（2026-11-06）：在子站里学了 3 分钟、且 3 天没导出过 → 底部弹一条（每天最多一次；首页有自己的横幅，不重复）
+  // ④ 备份提示（2026-11-06）：在子站里学了 3 分钟、且 15 天没导出过（2026-11-08 由 3 天改为 15 天） → 底部弹一条（每天最多一次；首页有自己的横幅，不重复）
   function nudge(force) {
     try {
       if (document.getElementById('ygBar') || document.getElementById('ygNudge')) return false;
       var day = Math.floor(Date.now() / 864e5), last = lastExport();
       if (!force) {
-        if (last && Date.now() - last < 3 * 864e5) return false;
+        if (last && Date.now() - last < 15 * 864e5) return false;
         if (+localStorage.getItem('yg_nudge') === day) return false;
         if (!Object.keys(localAll()).length) return false;
       }
