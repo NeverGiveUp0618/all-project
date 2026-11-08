@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v31-nudge-b2611062019';
+const CACHE = 'mingli-home-v31-nudge-b2611081212';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
                 './backup.html', './check.html', './guard.js'];
