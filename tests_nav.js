@@ -36,10 +36,10 @@ setTimeout(() => {
   const nos = cards.map(c => c.querySelector('.no').textContent);
 
   console.log('\n== 顺序固定 ==');
-  ok(cards.length === 7, '7 张卡片（六壬神课 2026-10-22 退役）');
-  ok(keys.join() === 'bazi,xiangfa,zeri,yangong,fengshui,jingjiang,lrcourse',
+  ok(cards.length === 8, '8 张卡片（六壬神课 2026-10-22 退役）');
+  ok(keys.join() === 'bazi,xiangfa,zeri,yangong,fengshui,jingjiang,lrcourse,mangpai',
      '顺序＝html 原序（即便 lrcourse 用了 99 次也没被提到前面）');
-  ok(nos.join() === '壹,贰,叁,肆,伍,陆,柒', '序号壹到柒，没乱');
+  ok(nos.join() === '壹,贰,叁,肆,伍,陆,柒,捌', '序号壹到柒，没乱');
   ok(!/appendChild\(c\)/.test(html) || !/sort\(function\(a,b\)/.test(html),
      '源码里没有按频率重排的逻辑');
 
@@ -66,7 +66,7 @@ setTimeout(() => {
 
   console.log('\n== 两处 App 名一致 ==');
   const names = [...html.matchAll(/(\w+):'([^']+)'/g)].filter(m => keys.includes(m[1]));
-  ok(names.length === 7, 'index.html 的 NAMES 覆盖 7 个 App');
+  ok(names.length === 8, 'index.html 的 NAMES 覆盖 8 个 App');
   ok(names.every(m => new RegExp(m[1] + '\\s*:\\s*\\{u:').test(view)), 'view.html 的 APP 表也都有');
 
   console.log('\n== 进度备份 ==');
