@@ -149,6 +149,11 @@
   }
 
   /* 今日学习时长 */
+  .nbk{display:flex;align-items:center;gap:14px;margin:0 auto 16px;width:100%;max-width:540px;padding:13px 16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(100deg,rgba(217,184,119,.13),rgba(14,20,36,.55) 60%);text-decoration:none;color:var(--ink);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .nbk:active{transform:scale(.985)}
+  .nbk .ic2{flex:0 0 44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--gold);color:#2a2108;font-size:22px;font-weight:700;font-family:"Noto Serif SC","Songti SC",serif}
+  .nbk .t1{font-size:16px;letter-spacing:.2em;color:var(--gold-hi)}.nbk .t2{font-size:12.5px;color:var(--ink-dim);margin-top:2px}
+  .nbk .t2 b{color:var(--gold);font-weight:600}.nbk .ar{margin-left:auto;color:var(--gold);font-size:22px}
   .tm{margin:0 auto 18px;width:100%;max-width:540px;padding:14px 16px 10px;border:1px solid var(--line);border-radius:16px;background:var(--panel);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   .tm-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
   .tm-k{display:block;font-size:12px;letter-spacing:.2em;color:var(--cyan-dim)}
@@ -221,6 +226,8 @@
       <div class="tm-week" id="tm-week"></div>
       <div class="tm-note">只统计从本导航进入、前台有操作的时间</div>
     </section>
+
+    <a class="nbk" href="notebook.html" id="nbk"><div class="ic2">笔</div><div><div class="t1">笔 记 本</div><div class="t2" id="nbk-sub">各科划的重点、疑问与随记，都收在这里</div></div><span class="ar">&#8250;</span></a>
 
     <main class="grid" id="grid">
 <div id="ygBar" style="display:none;margin:10px 14px 0;padding:11px 14px;border:1px solid rgba(217,150,90,.55);background:rgba(217,150,90,.12);border-radius:12px;color:#f0d6b4;font-size:13px;line-height:1.7"></div>
@@ -565,6 +572,11 @@ if('serviceWorker' in navigator){
     el.innerHTML='⚠️ <b>学习进度只存在这部手机的微信里</b>，微信一清缓存就没了。'+(d<0?'你<b>还没备份过</b>。':'上次备份是 <b>'+d+' 天前</b>。')+' <a href="backup.html" style="color:#ffd9a3;font-weight:600">→ 现在去备份（30 秒）</a>';
   }
   if(window.YG)YG.ready.then(show);else show();
-})();</script>
+})();
+// 笔记本入口的数量（同域读 ygn_v1）
+(function(){try{var o=JSON.parse(localStorage.getItem('ygn_v1')||'null'),a=(o&&o.items)||[];if(!a.length)return;
+  var now=Date.now(),due=a.filter(function(x){return x.kind!=='ok'&&((x.rv&&x.rv.due)||(x.t+864e5))<=now}).length;
+  document.getElementById('nbk-sub').innerHTML='共 <b>'+a.length+'</b> 条'+(due?' · 今日待复习 <b>'+due+'</b> 条':' · 今天没有待复习');}catch(e){}})();
+</script>
 </body>
 </html>

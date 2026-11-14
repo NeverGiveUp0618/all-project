@@ -1,7 +1,7 @@
-const CACHE = 'mingli-home-v31-nudge-b2611081931';
+const CACHE = 'mingli-home-v32-notebook';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
-                './backup.html', './check.html', './guard.js'];
+                './backup.html', './check.html', './guard.js', './notebook.html', './notes.js'];
 
 self.addEventListener('install', e => {
   // ⚠️ addAll 必须兜底：任何一个资源取不到都会让 install 失败，

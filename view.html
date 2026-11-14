@@ -145,7 +145,7 @@
     f.addEventListener('load', function(){ load.classList.add('hide'); });
     setTimeout(function(){ load.classList.add('hide'); }, 5000);  // 兜底
     // 先等进度守护把本机镜像里缺的键补回来（最多等 1.5 秒），再载入模块，免得模块先读到空数据
-    Promise.race([(window.YG?YG.ready:Promise.resolve()), new Promise(function(r){setTimeout(r,1500);})]).then(function(){ f.src = app.u; });
+    Promise.race([(window.YG?YG.ready:Promise.resolve()), new Promise(function(r){setTimeout(r,1500);})]).then(function(){ var go=getParam('go'); f.src = app.u + (/^#[^\s]*$/.test(go) ? go : ''); });
 
     // 学习时长（2026-11-03）：套壳页在前台、且近 90 秒内有操作（本页或 iframe 里的点击/触摸/滚动/按键）才计时。
     // 每秒走一格（顶栏秒表），每满 5 秒落盘：localStorage.wst_time = {日期:{app:秒}}（首页今日学习/北斗连星读它）、
@@ -192,6 +192,7 @@
       html += '<a href="view.html?app='+k+'" class="'+(k===key?'cur':'')+'">'
             + '<span class="g">'+APPS[k].g+'</span>'+APPS[k].n+'</a>';
     }
+    html += '<a href="notebook.html" style="border-top:1px solid rgba(217,184,119,.2);margin-top:4px"><span class="g">笔</span>笔记本</a>';
     menu.innerHTML = html;
     function toggle(on){
       menu.classList.toggle('on', on); mask.classList.toggle('on', on); sw.classList.toggle('open', on);
