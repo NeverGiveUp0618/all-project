@@ -24,7 +24,7 @@ a{color:inherit}
 .ib.hot{background:var(--gold);color:#2a2108;border-color:var(--gold);font-weight:700}
 .ib b{font-weight:700}
 .wrap{max-width:1040px;margin:0 auto;padding:14px 14px calc(60px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:900px){.wrap{grid-template-columns:280px 1fr;align-items:start}.side{position:sticky;top:70px}}
+@media(min-width:900px){body:not(.embed) .wrap{grid-template-columns:280px 1fr;align-items:start}body:not(.embed) .side{position:sticky;top:70px}}
 .side,#list,.panel{min-width:0}
 .panel{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:14px 16px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 /* 概览 */
@@ -50,6 +50,8 @@ a{color:inherit}
 .sel{height:34px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.28);color:var(--ink);padding:0 8px;font:inherit;font-size:13px}
 .chk{font-size:13px;color:var(--ink2);display:flex;gap:6px;align-items:center}
 #fxBtn{display:none;width:100%;margin-top:10px;height:36px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--gold-hi);font-size:13.5px}
+body.embed #fxBtn{display:block}body.embed #fx{display:none}body.embed #fx.open{display:block}body.embed .side .apps,body.embed .side .tags{display:flex;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}
+body.embed .side>.panel:first-child{display:none}body.embed .side>.panel{margin-top:0!important}body.embed .bar{padding-top:6px}body.embed .wrap{padding-top:10px}body.embed .back{font-weight:600}
 @media(max-width:899px){#fxBtn{display:block}#fx{display:none}#fx.open{display:block}.side .apps,.side .tags{display:flex;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}}
 /* 列表 */
 .grp{font-size:13px;letter-spacing:.2em;color:var(--gold);margin:18px 2px 8px;display:flex;align-items:center;gap:8px}
@@ -117,7 +119,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
 </head>
 <body>
 <div class="bar"><div class="bar-in">
-  <a class="back" href="./">‹ 易术堂</a>
+  <a class="back" id="back" href="./">‹ 易术堂</a>
   <h1>笔 记 本</h1>
   <button class="ib hot" id="bRv" type="button">复习 <b id="nDue">0</b></button>
   <button class="ib" id="bMore" type="button">导出</button>
@@ -299,7 +301,19 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
     else if (a === 'copy') { copy(fmtOne(it)); }
     else if (a === 'del') { var snap = JSON.parse(JSON.stringify(it)); Y.remove(id); render(); toast('已删除', '撤销', function () { var all = Y.all(); all.unshift(snap); Y.saveAll(all); render(); }); }
   };
+  var EMBED = /[?&]embed=1/.test(location.search);
+  if (EMBED) {
+    document.body.classList.add('embed');
+    var m = /[?&]app=([a-z]+)/.exec(location.search); if (m && Y.APPS[m[1]] && Y.all().some(function (x) { return x.app === m[1]; })) st.app = m[1];
+    var bk = $('#back'); bk.textContent = '✕ 关闭'; bk.removeAttribute('href'); bk.style.cursor = 'pointer';
+    bk.onclick = function () { parent.postMessage({ ygn: 'close' }, location.origin); };
+    $('.bar h1').style.paddingRight = '0';
+  }
   function goSource(it) {
+    if (EMBED) {
+      var go0 = ''; try { go0 = new URL(it.path || '', location.origin).hash || ''; } catch (e) {}
+      parent.postMessage({ ygn: 'go', app: it.app, h: it.h, title: it.title || '', go: go0 }, location.origin); return;
+    }
     try { localStorage.setItem('ygn_jump', JSON.stringify({ app: it.app, h: it.h, t: Date.now(), title: it.title || '' })); } catch (e) {}
     var go = ''; try { var u = new URL(it.path || '', location.origin); go = u.hash || ''; } catch (e) {}
     location.href = 'view.html?app=' + it.app + (go ? '&go=' + encodeURIComponent(go) : '');

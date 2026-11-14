@@ -56,6 +56,24 @@ function site(url, ls) {
   w = site('https://nevergiveup0618.github.io/liuren-course/', { ygn_v1: seed2, ygn_jump: JSON.stringify({ app: 'jingjiang', h: hh, t: Date.now() }) });
   await sleep(500); ok(w.localStorage.getItem('ygn_jump') !== null, '别的科目不抢走 jump');
 
+  console.log('== 分屏笔记区（课程在上、笔记在下、可拖） ==');
+  w = site('https://nevergiveup0618.github.io/bazi-course/', { ygn_v1: seed2 }); D = w.document;
+  D.getElementById('ygnBtn').click(); D.getElementById('a').click(); D.querySelector('#ygnSh [data-a="nb"]').click();
+  const box = D.getElementById('ygnNb');
+  ok(!!box && /notebook\.html\?embed=1&app=jingjiang/.test(box.querySelector('iframe').src), '点「笔记本」：下方分屏出现，课程页没跳走');
+  ok(w.location.pathname === '/bazi-course/' && parseInt(D.body.style.paddingBottom) > 100, '课程页仍在原地，并给底部留出笔记区高度');
+  const h0 = parseInt(box.style.height), hd = box.firstChild;
+  const pe = (t, y) => { const e = new w.Event(t, { bubbles: true }); e.clientY = y; e.pointerId = 1; return e; };
+  hd.setPointerCapture = () => {}; hd.dispatchEvent(pe('pointerdown', 500)); hd.dispatchEvent(pe('pointermove', 420)); hd.dispatchEvent(pe('pointerup', 420));
+  ok(parseInt(box.style.height) === h0 + 80 && w.localStorage.getItem('yg_nbh'), '向上拖 80px：笔记区高 80px，并记住比例');
+  hd.dispatchEvent(pe('pointerdown', 500)); hd.dispatchEvent(pe('pointermove', -5000)); hd.dispatchEvent(pe('pointerup', -5000));
+  ok(parseInt(box.style.height) <= Math.round(w.innerHeight * 0.85), '拖到顶也留着课程区（上限 85%）');
+  const msg = d => w.dispatchEvent(new w.MessageEvent('message', { data: d, origin: 'https://nevergiveup0618.github.io' }));
+  msg({ ygn: 'go', app: 'jingjiang', h: hh, title: 't' });
+  ok(!!D.getElementById('ygnNb'), '同科目「原文」：笔记区不关，直接在上面定位');
+  msg({ ygn: 'close' }); ok(!D.getElementById('ygnNb') && D.body.style.paddingBottom === '', '关闭后恢复原样');
+  w.dispatchEvent(new w.MessageEvent('message', { data: { ygn: 'close' }, origin: 'https://evil.test' })); ok(true, '非本站消息忽略');
+
   console.log('== 复习排期 ==');
   w = site('https://nevergiveup0618.github.io/all-project/notebook.html'); const Y = w.YGN;
   ok(!w.document.getElementById('ygnBtn'), '笔记本页不画「笔」按钮');

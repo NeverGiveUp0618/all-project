@@ -91,7 +91,7 @@
       '#ygnBtn{position:fixed;left:12px;bottom:130px;touch-action:none;z-index:90;width:40px;height:40px;border-radius:50%;border:1px solid rgba(217,184,119,.55);background:rgba(28,24,14,.78);color:#f4e6be;font:600 15px/38px "Songti SC",serif;text-align:center;padding:0;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.35)}' +
       '#ygnBtn.on{background:#d9b877;color:#2a2108;box-shadow:0 0 0 4px rgba(217,184,119,.3),0 4px 14px rgba(0,0,0,.35)}' +
       '#ygnTip{position:fixed;left:50%;transform:translateX(-50%);bottom:178px;z-index:90;padding:6px 14px;border-radius:20px;background:rgba(28,24,14,.92);color:#f4e6be;font:12.5px/1.5 sans-serif;white-space:nowrap;display:none;border:1px solid rgba(217,184,119,.45)}' +
-      'html.ygn-mark #ygnTip{display:block}' +
+      'html.ygn-mark #ygnTip{display:block}#ygnTip button{cursor:pointer}' +
       '#ygnSh{position:fixed;left:0;right:0;bottom:0;z-index:95;max-width:560px;margin:0 auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#141a2b;color:#e9edf8;border-radius:18px 18px 0 0;border:1px solid rgba(217,184,119,.35);border-bottom:0;box-shadow:0 -10px 34px rgba(0,0,0,.5);font:14px/1.6 "Noto Serif SC","Songti SC",serif;transform:translateY(110%);transition:transform .22s ease}' +
       '#ygnSh.on{transform:none}#ygnSh .x{max-height:4.8em;overflow:auto;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);font-size:13px;color:#b9c2d8;margin-bottom:10px}' +
       '#ygnSh .r{display:flex;gap:8px;margin-bottom:10px}#ygnSh .r button{flex:1;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#e9edf8;font:inherit;font-size:14px;cursor:pointer}' +
@@ -163,7 +163,8 @@
     var bs = document.querySelectorAll(BLK);
     for (var i = 0; i < bs.length; i++) {
       if (hash(textOf(bs[i])) === j.h && bs[i].textContent.length >= 6) {
-        bs[i].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (nbBox) { bs[i].style.scrollMarginTop = '90px'; bs[i].scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+        else bs[i].scrollIntoView({ block: 'center', behavior: 'smooth' });
         bs[i].classList.add('ygn-flash');
         setTimeout(function (b) { return function () { b.classList.remove('ygn-flash'); }; }(bs[i]), 3800);
         jumpDone = true; try { localStorage.removeItem('ygn_jump'); } catch (e) {} return;
@@ -202,12 +203,70 @@
         it.kind = kind; it.memo = memo; it.title = it.title || heading(b);
         it.path = it.path || (location.pathname + location.search + location.hash);
         YGN.upsert(it); toast(ex ? '已保存' : '已存入笔记本（共 ' + YGN.all().length + ' 条）');
-        if (a === 'nb') { location.href = '/all-project/notebook.html'; return; }
       }
       closeSheet(); paint();
+      if (a === 'nb') openNotebook();
     };
-    requestAnimationFrame(function () { sheet.classList.add('on'); });
+    liftUi(); requestAnimationFrame(function () { sheet.classList.add('on'); });
   }
+
+  /* ---------------- 笔记本浮层：盖在课程上，关掉后课程原样不动 ---------------- */
+  var HUB = 'https://nevergiveup0618.github.io/all-project/';
+  var nbBox = null, nbH = 0, nbPad = '';
+  function nbMax() { return Math.round(window.innerHeight * 0.85); }
+  function nbSet(h) {
+    nbH = Math.max(140, Math.min(h, nbMax()));
+    if (nbBox) { nbBox.style.height = nbH + 'px'; document.body.style.paddingBottom = nbH + 'px'; }
+    liftUi();
+  }
+  function liftUi() {
+    var up = nbBox ? nbH : 0, t = document.getElementById('ygnTip');
+    if (t) t.style.bottom = up ? (up + 16) + 'px' : '';
+    if (sheet) sheet.style.bottom = up ? up + 'px' : '';
+  }
+  function openNotebook() {
+    if (nbBox) return;
+    var frac = 0.5; try { var v = parseFloat(localStorage.getItem('yg_nbh')); if (v > 0.15 && v < 0.9) frac = v; } catch (e) {}
+    nbBox = document.createElement('div'); nbBox.id = 'ygnNb';
+    nbBox.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:#05070f;border-top:2px solid #d9b877;box-shadow:0 -8px 28px rgba(0,0,0,.55);display:flex;flex-direction:column';
+    var hd = document.createElement('div');
+    hd.style.cssText = 'flex:0 0 26px;display:flex;align-items:center;justify-content:center;background:#10182c;cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none';
+    hd.innerHTML = '<i style="display:block;width:44px;height:5px;border-radius:3px;background:rgba(217,184,119,.7)"></i>';
+    hd.setAttribute('aria-label', '拖动调整笔记区高度');
+    var f = document.createElement('iframe');
+    f.src = HUB + 'notebook.html?embed=1&app=' + APP;
+    f.title = '笔记本'; f.style.cssText = 'flex:1;width:100%;border:0;display:block;background:#05070f;min-height:0';
+    nbBox.appendChild(hd); nbBox.appendChild(f); document.body.appendChild(nbBox);
+    nbPad = document.body.style.paddingBottom;
+    nbSet(window.innerHeight * frac);
+    var sy = null, sh = 0;
+    hd.addEventListener('pointerdown', function (e) { sy = e.clientY; sh = nbH; f.style.pointerEvents = 'none'; try { hd.setPointerCapture(e.pointerId); } catch (x) {} });
+    hd.addEventListener('pointermove', function (e) { if (sy == null) return; nbSet(sh + (sy - e.clientY)); e.preventDefault(); });
+    function up() { if (sy == null) return; sy = null; f.style.pointerEvents = ''; try { localStorage.setItem('yg_nbh', String(nbH / window.innerHeight)); } catch (x) {} }
+    hd.addEventListener('pointerup', up); hd.addEventListener('pointercancel', up);
+    window.addEventListener('resize', onResize);
+  }
+  function onResize() { if (nbBox) nbSet(nbH); }
+  function closeNotebook() {
+    if (!nbBox) return;
+    nbBox.parentNode.removeChild(nbBox); nbBox = null;
+    document.body.style.paddingBottom = nbPad;
+    window.removeEventListener('resize', onResize); liftUi();
+    paint();
+  }
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin) return;
+    var d = e.data || {}; if (!d.ygn) return;
+    if (d.ygn === 'close') closeNotebook();
+    else if (d.ygn === 'go') {
+      if (d.app === APP) {            // 同一科目：笔记区不关，直接在上面的课程页里找并定位；找不到再提示出处
+        try { localStorage.setItem('ygn_jump', JSON.stringify({ app: d.app, h: d.h, t: Date.now(), title: d.title || '' })); } catch (x) {}
+        jumpDone = false; jumpAt = Date.now(); tryJump._said = 0; tryJump();
+      } else {                         // 别的科目：才整页切过去
+        (window.top || window).location.href = HUB + 'view.html?app=' + d.app + (d.go ? '&go=' + encodeURIComponent(d.go) : '');
+      }
+    }
+  });
 
   /* ---------------- 按钮与点击拦截 ---------------- */
   function setMark(on) {
@@ -242,7 +301,9 @@
         sx = null;
       });
     })();
-    var tip = document.createElement('div'); tip.id = 'ygnTip'; tip.textContent = '标记模式：点一段就能记 · 再点「笔」退出';
+    var tip = document.createElement('div'); tip.id = 'ygnTip';
+    tip.innerHTML = '标记模式：点一段就能记 <button type="button" id="ygnTipNb" style="margin-left:8px;height:26px;padding:0 12px;border-radius:13px;border:1px solid #d9b877;background:#d9b877;color:#2a2108;font:600 12.5px sans-serif">笔记本</button>';
+    tip.querySelector('#ygnTipNb').onclick = function (e) { e.stopPropagation(); if (nbBox) closeNotebook(); else openNotebook(); };
     document.body.appendChild(b); document.body.appendChild(tip);
     document.addEventListener('click', function (e) {
       if (!mark) return;
