@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v32-notebook';
+const CACHE = 'mingli-home-v33-notebook';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
                 './backup.html', './check.html', './guard.js', './notebook.html', './notes.js'];

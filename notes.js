@@ -88,9 +88,9 @@
       'html.ygn-mark p,html.ygn-mark li,html.ygn-mark blockquote,html.ygn-mark dd,html.ygn-mark tr,html.ygn-mark pre{cursor:pointer}' +
       'html.ygn-mark p:active,html.ygn-mark li:active,html.ygn-mark blockquote:active,html.ygn-mark tr:active{outline:1.5px dashed rgba(217,184,119,.8);outline-offset:2px}' +
       '.ygn-flash{animation:ygnf 1.6s ease 2}@keyframes ygnf{0%,100%{box-shadow:0 0 0 0 rgba(217,184,119,0)}50%{box-shadow:0 0 0 6px rgba(217,184,119,.45)}}' +
-      '#ygnBtn{position:fixed;right:12px;bottom:84px;z-index:90;width:40px;height:40px;border-radius:50%;border:1px solid rgba(217,184,119,.55);background:rgba(28,24,14,.78);color:#f4e6be;font:600 15px/38px "Songti SC",serif;text-align:center;padding:0;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.35)}' +
+      '#ygnBtn{position:fixed;left:12px;bottom:130px;touch-action:none;z-index:90;width:40px;height:40px;border-radius:50%;border:1px solid rgba(217,184,119,.55);background:rgba(28,24,14,.78);color:#f4e6be;font:600 15px/38px "Songti SC",serif;text-align:center;padding:0;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 4px 14px rgba(0,0,0,.35)}' +
       '#ygnBtn.on{background:#d9b877;color:#2a2108;box-shadow:0 0 0 4px rgba(217,184,119,.3),0 4px 14px rgba(0,0,0,.35)}' +
-      '#ygnTip{position:fixed;left:50%;transform:translateX(-50%);bottom:132px;z-index:90;padding:6px 14px;border-radius:20px;background:rgba(28,24,14,.92);color:#f4e6be;font:12.5px/1.5 sans-serif;white-space:nowrap;display:none;border:1px solid rgba(217,184,119,.45)}' +
+      '#ygnTip{position:fixed;left:50%;transform:translateX(-50%);bottom:178px;z-index:90;padding:6px 14px;border-radius:20px;background:rgba(28,24,14,.92);color:#f4e6be;font:12.5px/1.5 sans-serif;white-space:nowrap;display:none;border:1px solid rgba(217,184,119,.45)}' +
       'html.ygn-mark #ygnTip{display:block}' +
       '#ygnSh{position:fixed;left:0;right:0;bottom:0;z-index:95;max-width:560px;margin:0 auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#141a2b;color:#e9edf8;border-radius:18px 18px 0 0;border:1px solid rgba(217,184,119,.35);border-bottom:0;box-shadow:0 -10px 34px rgba(0,0,0,.5);font:14px/1.6 "Noto Serif SC","Songti SC",serif;transform:translateY(110%);transition:transform .22s ease}' +
       '#ygnSh.on{transform:none}#ygnSh .x{max-height:4.8em;overflow:auto;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);font-size:13px;color:#b9c2d8;margin-bottom:10px}' +
@@ -215,12 +215,33 @@
     var b = document.getElementById('ygnBtn'); if (b) b.classList.toggle('on', on);
     if (!on) closeSheet();
   }
+  var _tip = 0;
   function build() {
     if (document.getElementById('ygnBtn')) return;
     css();
     var b = document.createElement('button');
     b.id = 'ygnBtn'; b.type = 'button'; b.textContent = '笔'; b.setAttribute('aria-label', '标记笔记');
-    b.onclick = function (e) { e.stopPropagation(); setMark(!mark); };
+    var drag = 0;
+    b.onclick = function (e) { e.stopPropagation(); if (drag) { drag = 0; return; } setMark(!mark); };
+    // 可拖动：别的按钮（如「下一章」）被挡住时自己拖开，位置记在本机
+    (function () {
+      var sx, sy, ox, oy, mv = 0;
+      try { var p = JSON.parse(localStorage.getItem('yg_npos') || 'null'); if (p) place(p.x, p.y); } catch (e) {}
+      function place(x, y) {
+        var W = window.innerWidth - 40, H = window.innerHeight - 40;
+        b.style.left = Math.max(4, Math.min(x, W)) + 'px'; b.style.top = Math.max(4, Math.min(y, H)) + 'px'; b.style.bottom = 'auto'; b.style.right = 'auto';
+      }
+      b.addEventListener('pointerdown', function (e) { var r = b.getBoundingClientRect(); sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top; mv = 0; try { b.setPointerCapture(e.pointerId); } catch (x) {} });
+      b.addEventListener('pointermove', function (e) {
+        if (sx == null) return;
+        if (!mv && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) < 8) return;
+        mv = 1; drag = 1; place(ox + e.clientX - sx, oy + e.clientY - sy); e.preventDefault();
+      });
+      b.addEventListener('pointerup', function () {
+        if (mv) { try { var r = b.getBoundingClientRect(); localStorage.setItem('yg_npos', JSON.stringify({ x: r.left, y: r.top })); } catch (e) {} setTimeout(function () { drag = 0; }, 60); }
+        sx = null;
+      });
+    })();
     var tip = document.createElement('div'); tip.id = 'ygnTip'; tip.textContent = '标记模式：点一段就能记 · 再点「笔」退出';
     document.body.appendChild(b); document.body.appendChild(tip);
     document.addEventListener('click', function (e) {
