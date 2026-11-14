@@ -68,6 +68,11 @@ body.embed .side>.panel:first-child{display:none}body.embed .side>.panel{margin-
 .txt{color:#e6ebf7;font-size:15px;line-height:1.85;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden;cursor:pointer}
 .txt.full{-webkit-line-clamp:unset;display:block}
 mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 1px}
+.src{display:flex;align-items:center;gap:8px;margin:9px 0 0;padding:8px 11px;border:1px solid rgba(217,184,119,.4);border-radius:11px;background:rgba(217,184,119,.07);cursor:pointer;font-size:13px;color:var(--gold-hi);line-height:1.5}
+.src:active{background:rgba(217,184,119,.2)}
+.src .sl{flex:0 0 auto;font-size:11px;letter-spacing:.15em;color:var(--gold-lo)}
+.src .sp{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src b{flex:0 0 auto;font-weight:600;color:var(--gold);font-size:12.5px}
 .memo{margin:8px 0 0;padding:7px 11px;border-radius:10px;background:rgba(217,184,119,.09);border-left:2px solid var(--gold);color:var(--gold-hi);font-size:13.5px;line-height:1.75;white-space:pre-wrap}
 .tg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .tg span{font-size:12px;color:var(--cyan);background:rgba(143,211,224,.1);border-radius:9px;padding:0 8px;cursor:pointer}
@@ -241,10 +246,10 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
     return '<div class="card' + (x.kind === 'ok' ? ' ok' : '') + '" data-id="' + x.id + '" style="--kc:' + KC[x.kind || 'key'] + ';--kb:rgba(' + k.c + ',.12);--ac:' + a.c + '">' +
       '<div class="meta"><span class="ap"><i>' + a.g + '</i>' + a.n + '</span><span class="kd">' + k.n + '</span><span class="ti">' + esc(x.title || '') + '</span><span>' + ymd(x.t) + '</span></div>' +
       '<div class="txt" data-a="exp">' + hl(x.text) + '</div>' +
+      (x.h ? '<div class="src" data-a="go" role="button" tabindex="0"><span class="sl">出处</span><span class="sp">' + esc(a.n + ' › ' + [x.crumb, x.title].filter(function (v, i, r) { return v && r.indexOf(v) === i; }).join(' · ')) + '</span><b>回到出处 ›</b></div>' : '') +
       (x.memo ? '<div class="memo">' + hl(x.memo) + '</div>' : '') +
       ((x.tags || []).length ? '<div class="tg">' + x.tags.map(function (g) { return '<span data-tag="' + esc(g) + '">#' + esc(g) + '</span>'; }).join('') + '</div>' : '') +
-      '<div class="act">' + (x.h ? '<button type="button" data-a="go">原文</button>' : '') +
-      '<button type="button" data-a="edit">批注</button><button type="button" data-a="cyc">改类型</button><button type="button" data-a="copy">复制</button>' +
+      '<div class="act">' + '<button type="button" data-a="edit">批注</button><button type="button" data-a="cyc">改类型</button><button type="button" data-a="copy">复制</button>' +
       '<button type="button" class="d" data-a="del">删除</button></div></div>';
   }
   function render() {
@@ -312,9 +317,9 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
   function goSource(it) {
     if (EMBED) {
       var go0 = ''; try { go0 = new URL(it.path || '', location.origin).hash || ''; } catch (e) {}
-      parent.postMessage({ ygn: 'go', app: it.app, h: it.h, title: it.title || '', go: go0 }, location.origin); return;
+      parent.postMessage({ ygn: 'go', app: it.app, h: it.h, title: it.title || '', go: go0, loc: it.loc || null }, location.origin); return;
     }
-    try { localStorage.setItem('ygn_jump', JSON.stringify({ app: it.app, h: it.h, t: Date.now(), title: it.title || '' })); } catch (e) {}
+    try { localStorage.setItem('ygn_jump', JSON.stringify({ app: it.app, h: it.h, t: Date.now(), title: it.title || '', loc: it.loc || null })); } catch (e) {}
     var go = ''; try { var u = new URL(it.path || '', location.origin); go = u.hash || ''; } catch (e) {}
     location.href = 'view.html?app=' + it.app + (go ? '&go=' + encodeURIComponent(go) : '');
   }

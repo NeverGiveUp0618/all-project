@@ -121,6 +121,16 @@
     }
     return last.slice(0, 40) || (document.title || '').slice(0, 40);
   }
+  /* 站点位置钩子：各站在自己的 app.js 里定义 window.YGN_HOOK = {loc(), go(loc), label?()}。
+     loc() 返回「现在在哪一节」（可序列化的小对象，没有就返回 null）；go(loc) 回到那一节。 */
+  function siteLoc() { try { var h = window.YGN_HOOK; return h && h.loc ? (h.loc() || null) : null; } catch (e) { return null; } }
+  function siteCrumb() {
+    try {
+      var h = window.YGN_HOOK; if (h && h.label) return String(h.label() || '').slice(0, 40);
+      var e = document.querySelector('.screen.active h1,.screen.active h2,.view.active h1,.view.active h2');
+      return e ? e.textContent.trim().slice(0, 40) : '';
+    } catch (x) { return ''; }
+  }
   function toast(msg) {
     var t = document.getElementById('ygnToast');
     if (!t) { t = document.createElement('div'); t.id = 'ygnToast'; document.body.appendChild(t); }
@@ -155,7 +165,16 @@
   function schedule() { clearTimeout(pt); pt = setTimeout(function () { paint(); tryJump(); }, 350); }
 
   /* 从笔记本点「去原文」：笔记本写 ygn_jump，这里等对应段落出现后滚过去闪一下 */
-  var jumpDone = false, jumpAt = Date.now();
+  var jumpDone = false, jumpAt = Date.now(), locTried = 0;
+  (function applyLoc() {
+    var j; try { j = JSON.parse(localStorage.getItem('ygn_jump') || 'null'); } catch (e) {}
+    if (!j || j.app !== APP || !j.loc || Date.now() - j.t > 60000) return;
+    var n = 0, iv = setInterval(function () {
+      var h = window.YGN_HOOK;
+      if (h && h.go && n > 1) { clearInterval(iv); setTimeout(function () { try { h.go(j.loc); } catch (e) {} }, 500); }
+      else if (++n > 30) clearInterval(iv);
+    }, 300);
+  })();
   function tryJump() {
     if (jumpDone) return;
     var j; try { j = JSON.parse(localStorage.getItem('ygn_jump') || 'null'); } catch (e) {}
@@ -197,15 +216,16 @@
       var t = e.target.closest('button'); if (!t) return;
       if (t.dataset.k) { kind = t.dataset.k; var m = sheet.querySelector('#ygnMemo').value; ex = ex || null; draw(); sheet.querySelector('#ygnMemo').value = m; return; }
       var a = t.dataset.a, memo = sheet.querySelector('#ygnMemo').value.trim();
+      if (a === 'nb') { closeSheet(); openNotebook(); return; }     // 只打开笔记本，不顺手存
       if (a === 'del') { YGN.remove(ex.id); toast('已取消标记'); }
-      else if (a === 'ok' || a === 'nb') {
+      else if (a === 'ok') {
         var it = ex || { id: YGN.uid(), app: APP, h: h, text: text, tags: [], t: Date.now(), kind: kind };
         it.kind = kind; it.memo = memo; it.title = it.title || heading(b);
         it.path = it.path || (location.pathname + location.search + location.hash);
+        if (!it.loc) { it.loc = siteLoc(); it.crumb = siteCrumb(); }
         YGN.upsert(it); toast(ex ? '已保存' : '已存入笔记本（共 ' + YGN.all().length + ' 条）');
       }
       closeSheet(); paint();
-      if (a === 'nb') openNotebook();
     };
     liftUi(); requestAnimationFrame(function () { sheet.classList.add('on'); });
   }
@@ -261,8 +281,11 @@
     else if (d.ygn === 'go') {
       if (d.app === APP) {            // 同一科目：笔记区不关，直接在上面的课程页里找并定位；找不到再提示出处
         try { localStorage.setItem('ygn_jump', JSON.stringify({ app: d.app, h: d.h, t: Date.now(), title: d.title || '' })); } catch (x) {}
-        jumpDone = false; jumpAt = Date.now(); tryJump._said = 0; tryJump();
+        jumpDone = false; jumpAt = Date.now(); tryJump._said = 0;
+        if (d.loc && window.YGN_HOOK && window.YGN_HOOK.go) { try { window.YGN_HOOK.go(d.loc); } catch (x) {} }
+        var n = 0, iv = setInterval(function () { tryJump(); if (jumpDone || ++n > 14) clearInterval(iv); }, 350);
       } else {                         // 别的科目：才整页切过去
+        try { localStorage.setItem('ygn_jump', JSON.stringify({ app: d.app, h: d.h, t: Date.now(), title: d.title || '', loc: d.loc || null })); } catch (x) {}
         (window.top || window).location.href = HUB + 'view.html?app=' + d.app + (d.go ? '&go=' + encodeURIComponent(d.go) : '');
       }
     }
