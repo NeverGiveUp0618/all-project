@@ -37,7 +37,7 @@ setTimeout(() => {
 
   console.log('\n== 顺序固定 ==');
   ok(cards.length === 8, '8 张卡片（六壬神课 2026-10-22 退役）');
-  ok(keys.join() === 'bazi,xiangfa,zeri,yangong,fengshui,jingjiang,lrcourse,mangpai',
+  ok(keys.join() === 'mangpai,bazi,xiangfa,zeri,yangong,fengshui,jingjiang,lrcourse',
      '顺序＝html 原序（即便 lrcourse 用了 99 次也没被提到前面）');
   ok(nos.join() === '壹,贰,叁,肆,伍,陆,柒,捌', '序号壹到柒，没乱');
   ok(!/appendChild\(c\)/.test(html) || !/sort\(function\(a,b\)/.test(html),
