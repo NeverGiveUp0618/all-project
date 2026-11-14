@@ -74,6 +74,16 @@ function site(url, ls) {
   msg({ ygn: 'close' }); ok(!D.getElementById('ygnNb') && D.body.style.paddingBottom === '', '关闭后恢复原样');
   w.dispatchEvent(new w.MessageEvent('message', { data: { ygn: 'close' }, origin: 'https://evil.test' })); ok(true, '非本站消息忽略');
 
+  console.log('== 站点钩子：正文是 div 的站（择日）也能标记 ==');
+  {
+    const dom = new JSDOM('<!doctype html><body><div class="bp" id="x">天德月德为择日之要，凡用事先看此二者是否到位。</div></body>', { runScripts: 'outside-only', url: 'https://nevergiveup0618.github.io/zeri/', pretendToBeVisual: true });
+    dom.window.YGN_HOOK = { blocks: '.bp,.bl,.bh', loc: () => ({ v: 'detail', id: 'z1' }), go() {}, label: () => '天德月德' };
+    dom.window.eval(NOTES); const d = dom.window.document;
+    d.getElementById('ygnBtn').click(); d.getElementById('x').click(); d.querySelector('#ygnSh [data-a="ok"]').click();
+    const it = dom.window.YGN.all()[0];
+    ok(it && it.app === 'zeri' && it.loc && it.loc.id === 'z1' && it.crumb === '天德月德', 'div 正文可标记，并记下站内位置 loc 与出处名 crumb');
+    await sleep(500); ok(d.getElementById('x').classList.contains('ygn-key'), 'div 正文也能常亮');
+  }
   console.log('== 复习排期 ==');
   w = site('https://nevergiveup0618.github.io/all-project/notebook.html'); const Y = w.YGN;
   ok(!w.document.getElementById('ygnBtn'), '笔记本页不画「笔」按钮');

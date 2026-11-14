@@ -74,7 +74,9 @@
   if (!APP) return;
 
   /* ---------------- 子站：标记模式 ---------------- */
-  var BLK = 'p,li,blockquote,dd,tr,pre,.verse,.kou,.q';
+  var BLK0 = 'p,li,blockquote,dd,tr,pre,.verse,.kou,.q';
+  // 有的站正文是 div（如择日学习的 .bp/.bl/.bh），站点可在 YGN_HOOK.blocks 里补充选择器
+  function BLKS() { var h = window.YGN_HOOK; return BLK0 + (h && h.blocks ? ',' + h.blocks : ''); }
   var mark = false, sheet = null, map = null, busy = 0;
 
   function css() {
@@ -106,7 +108,7 @@
   function blockOf(el) {
     if (!el || !el.closest) return null;
     if (el.closest('#ygnSh,#ygnBtn,#ygnTip,header,nav,footer,button,input,textarea,select,.topbar,.tabbar,.bottombar')) return null;
-    var b = el.closest(BLK); if (!b) return null;
+    var b = el.closest(BLKS()); if (!b) return null;
     // li/tr 里套了更内层的 p 时，点到哪个取哪个（closest 已取最内层）；整块太长的容器不当作一条
     var t = norm(b.textContent);
     if (t.length < 6) return null;
@@ -144,7 +146,7 @@
     var m = {}; items.forEach(function (x) { m[x.h] = x; });
     map = m;
     var any = items.length > 0;
-    var bs = document.querySelectorAll(BLK), i, b, k;
+    var bs = document.querySelectorAll(BLKS()), i, b, k;
     busy = 1;
     for (i = 0; i < bs.length; i++) {
       b = bs[i];
@@ -179,7 +181,7 @@
     if (jumpDone) return;
     var j; try { j = JSON.parse(localStorage.getItem('ygn_jump') || 'null'); } catch (e) {}
     if (!j || j.app !== APP || Date.now() - j.t > 60000) { jumpDone = true; return; }
-    var bs = document.querySelectorAll(BLK);
+    var bs = document.querySelectorAll(BLKS());
     for (var i = 0; i < bs.length; i++) {
       if (hash(textOf(bs[i])) === j.h && bs[i].textContent.length >= 6) {
         if (nbBox) { bs[i].style.scrollMarginTop = '90px'; bs[i].scrollIntoView({ block: 'start', behavior: 'smooth' }); }
