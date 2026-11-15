@@ -189,6 +189,9 @@
   #ring-time .now{animation:dp 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 
 
+  .sc-chip{display:inline-block;margin-left:6px;padding:2px 9px;border-radius:12px;border:1px solid rgba(143,211,224,.4);color:var(--cyan);font-size:11.5px;letter-spacing:.06em;cursor:pointer;white-space:nowrap}
+  .sc-chip:active{background:rgba(143,211,224,.18)}
+
   /* 学习日历 */
   .tm{position:relative}
   .cal-btn{position:absolute;top:11px;left:112px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 10px;border-radius:16px;border:1px solid rgba(217,184,119,.38);background:rgba(217,184,119,.1);color:var(--gold-hi);font:500 12.5px/1 inherit;font-family:inherit;letter-spacing:.12em;cursor:pointer;z-index:2}
@@ -246,7 +249,7 @@
       <div class="glow"></div>
       <svg class="compass spin" id="ring-out" viewBox="0 0 200 200" fill="none"></svg>
       <svg class="compass spin-r" id="ring-in" viewBox="0 0 200 200" fill="none"></svg>
-      <svg class="compass" id="ring-time" viewBox="0 0 200 200" fill="none" aria-label="今日各时辰学习时长"></svg>
+      <svg class="compass" id="ring-time" viewBox="0 0 200 200" fill="none" aria-label="各时辰学习时长（点击切换范围）"></svg>
       <div class="core"><div class="tj">&#9775;</div></div>
     </div>
 
@@ -541,19 +544,32 @@
     sl.innerHTML=streak>=7?'北斗已成 · 连续 <b>'+streak+'</b> 天':(streak?'连续 <b>'+streak+'</b> 天':'今天学满 5 分钟点亮第一颗星');
     if(streak<7 && tot<300 && (streak||tot)) sl.innerHTML+=' · 再学 <b>'+Math.ceil((300-tot)/60)+'</b> 分钟点亮第 '+(streak+1)+' 颗';
     else if(streak<7 && tot<300 && !streak) {}
-    // 时辰环
-    var hr={}; try{hr=(JSON.parse(localStorage.getItem('wst_hour')||'{}')||{})[tk]||{};}catch(e){}
-    drawShichen(hr);
-    var pk=-1,pv=0,q; for(q=0;q<12;q++){ if((+hr[q]||0)>pv){pv=+hr[q];pk=q;} }
-    document.getElementById('tm-peak').innerHTML=pk>=0?'今日最旺：<b>'+ZC[pk]+'时</b>（'+['23–1','1–3','3–5','5–7','7–9','9–11','11–13','13–15','15–17','17–19','19–21','21–23'][pk]+' 点）· '+(pv<60?'<1':Math.round(pv/60))+' 分钟':'';
+    // 时辰环：点环或点「看：xx」切换 今日 / 近7天 / 近30天 / 全部
+    var HR={}; try{HR=JSON.parse(localStorage.getItem('wst_hour')||'{}')||{};}catch(e){}
+    var RG=[['今日',1],['近7天',7],['近30天',30],['全部',9999]], rg=RG[window.__shRg||0], hr={}, nd=0, dk, dd, q;
+    for(dk in HR){
+      var dt=dk.split('-'); if(dt.length<3) continue;
+      var age=Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate())-new Date(+dt[0],+dt[1]-1,+dt[2]))/864e5);
+      if(age<0||age>=rg[1]) continue;
+      var any=false; for(q=0;q<12;q++){ var vv=+HR[dk][q]||0; if(vv){hr[q]=(hr[q]||0)+vv;any=true;} }
+      if(any) nd++;
+    }
+    drawShichen(hr, rg[1]>1);
+    var pk=-1,pv=0; for(q=0;q<12;q++){ if((+hr[q]||0)>pv){pv=+hr[q];pk=q;} }
+    var TR=['23–1','1–3','3–5','5–7','7–9','9–11','11–13','13–15','15–17','17–19','19–21','21–23'];
+    document.getElementById('tm-peak').innerHTML=(pk>=0?rg[0]+'最旺：<b>'+ZC[pk]+'时</b>（'+TR[pk]+' 点）· '+(rg[1]>1?'累计 ':'')+(pv<60?'<1':Math.round(pv/60))+' 分钟'+(rg[1]>1&&nd?'（'+nd+' 天有记录）':''):(rg[1]>1?rg[0]+'还没有时辰记录':''))+' <span class="sc-chip" id="sc-chip" role="button" tabindex="0">时辰环：'+rg[0]+' ⟳</span>';
+    var chip=document.getElementById('sc-chip'); if(chip) chip.onclick=cycleRg;
   }
   // 罗盘时辰环：12 段，亮度 = 该时辰今日学习量（20 分钟满亮）；青点 = 此刻所处时辰位置
-  function drawShichen(hr){
+  window.__shRg=0;
+  function cycleRg(){ window.__shRg=((window.__shRg||0)+1)%4; render(); }
+  (function(){ var r=document.getElementById('ring-time'); if(r&&r.parentNode){ r.parentNode.style.cursor='pointer'; r.parentNode.addEventListener('click',cycleRg); } })();
+  function drawShichen(hr, rel){
     var svg=document.getElementById('ring-time'); if(!svg) return;
-    var R=70, s='', i;
+    var R=70, s='', i, mx=1; if(rel){ for(i=0;i<12;i++) mx=Math.max(mx,+hr[i]||0); }
     function pt(deg){var a=(deg-90)*Math.PI/180;return [100+R*Math.cos(a),100+R*Math.sin(a)];}
     for(i=0;i<12;i++){
-      var c=i*30, p1=pt(c-13), p2=pt(c+13), v=Math.min(1,(+hr[i]||0)/1200);
+      var c=i*30, p1=pt(c-13), p2=pt(c+13), v=Math.min(1,(+hr[i]||0)/(rel?mx:1200));
       var d='M'+p1[0].toFixed(1)+' '+p1[1].toFixed(1)+' A'+R+' '+R+' 0 0 1 '+p2[0].toFixed(1)+' '+p2[1].toFixed(1);
       s+='<path d="'+d+'" stroke="#d9b877" stroke-opacity=".13" stroke-width="5" stroke-linecap="round"/>';
       if(v>0) s+='<path d="'+d+'" stroke="#f4e6be" stroke-opacity="'+(0.3+0.7*v).toFixed(2)+'" stroke-width="5" stroke-linecap="round" style="filter:drop-shadow(0 0 '+(2+4*v).toFixed(1)+'px rgba(244,230,190,'+(0.4+0.5*v).toFixed(2)+'))"/>';

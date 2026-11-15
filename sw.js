@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v41-calendar';
+const CACHE = 'mingli-home-v42-shichen';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
                 './backup.html', './check.html', './guard.js', './notebook.html', './notes.js'];
