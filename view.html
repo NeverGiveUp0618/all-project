@@ -167,7 +167,7 @@
           var t = J('wst_time'), h = J('wst_hour'), hr = (new Date().getHours() + 1) % 24 >> 1;
           (t[day] = t[day] || {})[key] = (+t[day][key] || 0) + pend;
           (h[day] = h[day] || {})[hr] = (+h[day][hr] || 0) + pend;
-          trim(t, 800); trim(h, 800);
+          trim(t, 800); trim(h);
           localStorage.setItem('wst_time', JSON.stringify(t)); localStorage.setItem('wst_hour', JSON.stringify(h));
         }catch(x){}
         pend = 0;
