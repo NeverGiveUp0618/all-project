@@ -188,6 +188,44 @@
   #ring-time path{transition:opacity .4s}
   #ring-time .now{animation:dp 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 
+
+  /* 学习日历 */
+  .tm{position:relative}
+  .cal-btn{position:absolute;top:11px;left:112px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px 6px 10px;border-radius:16px;border:1px solid rgba(217,184,119,.38);background:rgba(217,184,119,.1);color:var(--gold-hi);font:500 12.5px/1 inherit;font-family:inherit;letter-spacing:.12em;cursor:pointer;z-index:2}
+  .cal-btn:active{background:rgba(217,184,119,.22)}
+  .cal-btn svg{width:15px;height:15px}
+  .cal-mask{position:fixed;inset:0;z-index:50;background:rgba(3,6,14,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
+  .cal-mask.on{display:flex}
+  .cal{width:100%;max-width:440px;max-height:92vh;overflow:auto;border-radius:20px;border:1px solid rgba(217,184,119,.3);background:linear-gradient(160deg,#121b30,#0a1020);box-shadow:0 20px 60px rgba(0,0,0,.6);padding:16px 16px 14px;color:var(--ink)}
+  .cal-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .cal-h .ttl{font-size:19px;letter-spacing:.14em;color:var(--gold-hi);font-weight:600}
+  .cal-nav{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--gold);font-size:18px;cursor:pointer;display:grid;place-items:center;padding:0}
+  .cal-nav:disabled{opacity:.25;cursor:default}
+  .cal-x{margin-left:auto;background:none;border:0;color:var(--ink-dim);font-size:13px;cursor:pointer;letter-spacing:.1em}
+  .cal-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 12px}
+  .cal-sum div{text-align:center;padding:8px 2px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+  .cal-sum b{display:block;font-size:17px;color:var(--gold-hi);font-weight:700;line-height:1.2}
+  .cal-sum span{font-size:11px;color:var(--ink-dim);letter-spacing:.06em}
+  .cal-w,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .cal-w span{text-align:center;font-size:11.5px;color:var(--cyan-dim);padding:2px 0 4px}
+  .cal-d{position:relative;aspect-ratio:1/1.08;border-radius:10px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.025);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;color:var(--ink-dim);font-size:11px;padding:0;font-family:inherit}
+  .cal-d i{font-style:normal;font-size:12px;color:var(--ink-dim);line-height:1}
+  .cal-d em{font-style:normal;font-size:11.5px;font-weight:600;color:var(--gold-hi);line-height:1.1;min-height:13px}
+  .cal-d.e{visibility:hidden}
+  .cal-d.l1{background:rgba(217,184,119,.14);border-color:rgba(217,184,119,.2)}
+  .cal-d.l2{background:rgba(217,184,119,.30);border-color:rgba(217,184,119,.35)}
+  .cal-d.l3{background:rgba(217,184,119,.50);border-color:rgba(217,184,119,.55)}.cal-d.l3 i,.cal-d.l3 em{color:#1d1606}
+  .cal-d.l4{background:linear-gradient(160deg,var(--gold-hi),var(--gold));border-color:var(--gold-hi)}.cal-d.l4 i,.cal-d.l4 em{color:#1d1606}
+  .cal-d.today{box-shadow:0 0 0 1.5px var(--cyan)}
+  .cal-d.sel{outline:2px solid var(--gold-hi);outline-offset:1px}
+  .cal-d.fut{opacity:.35;cursor:default}
+  .cal-lg{display:flex;align-items:center;justify-content:center;gap:5px;margin:10px 0 2px;font-size:11px;color:var(--ink-dim)}
+  .cal-lg u{display:inline-block;width:14px;height:14px;border-radius:4px;text-decoration:none}
+  .cal-det{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px dashed var(--line);font-size:13px;min-height:44px}
+  .cal-det .dt{color:var(--gold-hi);font-weight:600;margin-bottom:6px;letter-spacing:.06em}
+  .cal-det .tm-row{margin:4px 0}
+  .cal-note{font-size:10.5px;color:var(--ink-dim);opacity:.7;text-align:center;margin-top:8px}
+
   /* 今日学习卡：跟卡片列同宽；宽屏分两栏（左：时长/分条，右：近 7 天柱图），布局不变只是不再留大片空白 */
   @media (min-width:860px){
     .tm{max-width:1100px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"top week" "peak week" "bars week" "note note";column-gap:40px;padding:18px 24px 12px}
@@ -220,6 +258,7 @@
     <a class="cont" id="cont" href="#"><span class="k">继续</span><span id="cont-name"></span> &#8250;</a>
 
     <section class="tm" id="tm" aria-label="今日学习时长">
+      <button class="cal-btn" id="cal-open" type="button" aria-label="打开学习日历"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".9" fill="currentColor"/><circle cx="12" cy="14.5" r=".9" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".9" fill="currentColor"/></svg>日历</button>
       <div class="tm-top">
         <div class="tm-big"><span class="tm-k">今日学习</span><b id="tm-today">0</b><span class="tm-u" id="tm-unit">分钟</span></div>
         <div class="tm-side"><svg id="tm-dipper" viewBox="0 0 124 62" width="124" height="62" aria-label="北斗连星"></svg><span id="tm-streak"></span><span id="tm-week-total"></span></div>
@@ -565,6 +604,15 @@ if('serviceWorker' in navigator){
 }
 </script>
 <script src="guard.js"></script>
+<div class="cal-mask" id="cal-mask"><div class="cal" role="dialog" aria-label="学习日历">
+  <div class="cal-h"><button class="cal-nav" id="cal-prev" aria-label="上一月">&#8249;</button><span class="ttl" id="cal-ttl"></span><button class="cal-nav" id="cal-next" aria-label="下一月">&#8250;</button><button class="cal-x" id="cal-close">关闭</button></div>
+  <div class="cal-sum" id="cal-sum"></div>
+  <div class="cal-w"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+  <div class="cal-g" id="cal-g"></div>
+  <div class="cal-lg">少<u style="background:rgba(217,184,119,.14)"></u><u style="background:rgba(217,184,119,.30)"></u><u style="background:rgba(217,184,119,.50)"></u><u style="background:linear-gradient(160deg,#f4e6be,#d9b877)"></u>多　· 青框＝今天</div>
+  <div class="cal-det" id="cal-det"></div>
+  <div class="cal-note">只统计从本导航进入、前台有操作的时间；数据只存在这部手机里，最多保留约两年</div>
+</div></div>
 <script>(function(){
   var el=document.getElementById('ygBar');if(!el)return;
   function show(){
@@ -580,6 +628,58 @@ if('serviceWorker' in navigator){
 (function(){try{var o=JSON.parse(localStorage.getItem('ygn_v1')||'null'),a=(o&&o.items)||[];if(!a.length)return;
   var now=Date.now(),due=a.filter(function(x){return x.kind!=='ok'&&((x.rv&&x.rv.due)||(x.t+864e5))<=now}).length;
   document.getElementById('nbk-sub').innerHTML='共 <b>'+a.length+'</b> 条'+(due?' · 今日待复习 <b>'+due+'</b> 条':' · 今天没有待复习');}catch(e){}})();
+
+// —— 学习日历：按月查看每天的学习时长 ——
+(function(){
+  var NM={}; [].forEach.call(document.querySelectorAll('.card[data-app]'),function(c){var m=c.querySelector('.t-main'); if(m) NM[c.getAttribute('data-app')]=m.textContent.trim();});
+  var mask=document.getElementById('cal-mask'); if(!mask) return;
+  function $(i){return document.getElementById(i);}
+  function pad(n){return String(n).padStart(2,'0');}
+  function key(y,m,d){return y+'-'+pad(m+1)+'-'+pad(d);}
+  function fmt(sec){var m=Math.round(sec/60);return m>=60?Math.floor(m/60)+' 时 '+(m%60)+' 分':m+' 分';}
+  function short(sec){var m=Math.round(sec/60);return sec>0&&m<1?'<1':m>=60?(Math.floor(m/60))+'h'+(m%60?pad(m%60):''):String(m);}
+  function data(){try{return JSON.parse(localStorage.getItem('wst_time')||'{}')||{};}catch(e){return {};}}
+  function tot(o){var s=0,k;for(k in (o||{}))s+=+o[k]||0;return s;}
+  var now=new Date(), Y=now.getFullYear(), M=now.getMonth(), sel='';
+  function lvl(s){return s<=0?0:s<600?1:s<1800?2:s<3600?3:4;}
+  function draw(){
+    var t=data(), first=new Date(Y,M,1), n=new Date(Y,M+1,0).getDate(), lead=first.getDay(), g='', i, sum=0, days=0, best=0, bd=0;
+    var tk=key(now.getFullYear(),now.getMonth(),now.getDate());
+    for(i=0;i<lead;i++) g+='<div class="cal-d e"></div>';
+    for(i=1;i<=n;i++){
+      var k=key(Y,M,i), s=tot(t[k]), fut=k>tk;
+      if(s>0){sum+=s;if(s>=300)days++;if(s>best){best=s;bd=i;}}
+      g+='<button class="cal-d l'+lvl(s)+(k===tk?' today':'')+(k===sel?' sel':'')+(fut?' fut':'')+'" data-k="'+k+'"><i>'+i+'</i><em>'+(s>0?short(s):'')+'</em></button>';
+    }
+    $('cal-g').innerHTML=g;
+    $('cal-ttl').textContent=Y+' 年 '+(M+1)+' 月';
+    var past=key(Y,M,1)<=tk?(Y===now.getFullYear()&&M===now.getMonth()?now.getDate():n):0;
+    $('cal-sum').innerHTML='<div><b>'+(sum?fmt(sum):'0 分')+'</b><span>本月合计</span></div><div><b>'+days+'</b><span>学满5分钟的天数</span></div><div><b>'+(past&&sum?fmt(sum/past):'0 分')+'</b><span>日均</span></div><div><b>'+(bd?(M+1)+'/'+bd:'—')+'</b><span>最多的一天</span></div>';
+    $('cal-next').disabled=(Y===now.getFullYear()&&M===now.getMonth());
+    var keys=Object.keys(t).sort(); $('cal-prev').disabled=keys.length?(key(Y,M,1)<=keys[0].slice(0,8)+'01'):true;
+    $$d();
+  }
+  function $$d(){
+    var det=$('cal-det'), t=data();
+    if(!sel){det.innerHTML='<div class="dt" style="color:var(--ink-dim);font-weight:400">点一天，看当天各科目学了多久</div>';return;}
+    var o=t[sel]||{}, rows=Object.keys(o).filter(function(a){return o[a]>0;}).sort(function(a,b){return o[b]-o[a];}), mx=rows.length?o[rows[0]]:1;
+    var p=sel.split('-');
+    det.innerHTML='<div class="dt">'+(+p[1])+' 月 '+(+p[2])+' 日 · 共 '+(tot(o)?fmt(tot(o)):'0 分')+'</div>'+(rows.length?rows.map(function(a){
+      return '<div class="tm-row"><span class="nm">'+(NM[a]||a)+'</span><span class="bar"><i style="width:'+Math.max(4,Math.round(o[a]/mx*100))+'%"></i></span><span class="mn">'+(o[a]<60?'<1 分':fmt(o[a]))+'</span></div>';
+    }).join(''):'<div class="tm-empty">这天没有记录。</div>');
+  }
+  $('cal-g').addEventListener('click',function(e){
+    var b=e.target.closest?e.target.closest('.cal-d'):null; if(!b||b.classList.contains('e')||b.classList.contains('fut')) return;
+    sel=b.getAttribute('data-k'); draw();
+  });
+  $('cal-prev').onclick=function(){M--;if(M<0){M=11;Y--;}sel='';draw();};
+  $('cal-next').onclick=function(){M++;if(M>11){M=0;Y++;}sel='';draw();};
+  function open(){now=new Date();Y=now.getFullYear();M=now.getMonth();sel=key(Y,M,now.getDate());draw();mask.classList.add('on');}
+  function close(){mask.classList.remove('on');}
+  $('cal-open').onclick=open; $('cal-close').onclick=close;
+  mask.addEventListener('click',function(e){if(e.target===mask)close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
 </script>
 </body>
 </html>

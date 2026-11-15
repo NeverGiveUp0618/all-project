@@ -158,7 +158,7 @@
       f.addEventListener('load', hook);
       function ymd(){ var d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
       function J(k){ try{ return JSON.parse(localStorage.getItem(k) || '{}') || {}; }catch(x){ return {}; } }
-      function trim(t){ var ks = Object.keys(t).sort(); while(ks.length > 90) delete t[ks.shift()]; }
+      function trim(t, n){ var ks = Object.keys(t).sort(); n = n || 90; while(ks.length > n) delete t[ks.shift()]; }
       var day = ymd(), total = 0, pend = 0, clk = document.getElementById('clk');
       function load(){ var o = J('wst_time')[day] || {}, s = 0; for(var k in o) s += +o[k] || 0; total = s; }
       function save(){
@@ -167,7 +167,7 @@
           var t = J('wst_time'), h = J('wst_hour'), hr = (new Date().getHours() + 1) % 24 >> 1;
           (t[day] = t[day] || {})[key] = (+t[day][key] || 0) + pend;
           (h[day] = h[day] || {})[hr] = (+h[day][hr] || 0) + pend;
-          trim(t); trim(h);
+          trim(t, 800); trim(h);
           localStorage.setItem('wst_time', JSON.stringify(t)); localStorage.setItem('wst_hour', JSON.stringify(h));
         }catch(x){}
         pend = 0;
