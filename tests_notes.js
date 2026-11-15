@@ -108,6 +108,9 @@ function site(url, ls) {
   ok(N.querySelectorAll('.grp').length === 3, '按科目分三组');
   N.querySelector('#kinds [data-v="q"]').click(); ok(N.querySelectorAll('.card').length === 1 && /先锋门/.test(N.getElementById('list').textContent), '按类型筛：只剩疑问');
   N.querySelector('#kinds [data-v=""]').click(); N.querySelector('#apps [data-v="mangpai"]').click(); ok(N.querySelectorAll('.card').length === 1, '按科目筛');
+  ok(N.querySelectorAll('#apps .chip').length >= 8 && N.querySelectorAll('#apps .chip.dim').length >= 3, '科目栏固定列出全部科目，没笔记的灰着（先空着）');
+  N.querySelector('#apps [data-v="zeri"]').click(); ok(/还没有笔记/.test(N.getElementById('list').textContent) && !!N.querySelector('.empty a[href*="app=zeri"]'), '点空科目：提示先空着，并给「去该科目」入口');
+  N.querySelector('#apps [data-v="mangpai"]').click();
   N.querySelector('#apps [data-v=""]').click(); N.querySelector('#tags [data-v="口诀"]').click(); ok(N.querySelectorAll('.card').length === 2, '按标签筛：2 条');
   N.querySelector('#tags [data-v=""]').click(); const q = N.getElementById('q'); q.value = '直事'; q.dispatchEvent(new n.Event('input')); ok(N.querySelectorAll('.card').length === 1 && !!N.querySelector('mark'), '搜索并高亮命中');
   q.value = ''; q.dispatchEvent(new n.Event('input'));

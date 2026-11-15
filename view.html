@@ -192,7 +192,7 @@
       html += '<a href="view.html?app='+k+'" class="'+(k===key?'cur':'')+'">'
             + '<span class="g">'+APPS[k].g+'</span>'+APPS[k].n+'</a>';
     }
-    html += '<a href="notebook.html" style="border-top:1px solid rgba(217,184,119,.2);margin-top:4px"><span class="g">笔</span>笔记本</a>';
+    html += '<a href="notebook.html" style="border-top:1px solid rgba(217,184,119,.2);margin-top:4px"><span class="g">笔</span>全科笔记本</a>';
     menu.innerHTML = html;
     function toggle(on){
       menu.classList.toggle('on', on); mask.classList.toggle('on', on); sw.classList.toggle('open', on);

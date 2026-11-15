@@ -211,7 +211,7 @@
         }).join('') + '</div>' +
         '<textarea id="ygnMemo" placeholder="写一句自己的话（可不写）：为什么重要、和哪条冲突、怎么记…">' + esc(ex ? ex.memo || '' : '') + '</textarea>' +
         '<div class="f">' + (ex ? '<button type="button" class="del" data-a="del">取消标记</button>' : '') +
-        '<button type="button" data-a="nb">笔记本</button><button type="button" class="go" data-a="ok">' + (ex ? '保存' : '存入笔记本') + '</button></div>';
+        '<button type="button" data-a="nb">全科笔记本</button><button type="button" class="go" data-a="ok">' + (ex ? '保存' : '存入全科笔记本') + '</button></div>';
     }
     draw();
     sheet.onclick = function (e) {
@@ -225,7 +225,7 @@
         it.kind = kind; it.memo = memo; it.title = it.title || heading(b);
         it.path = it.path || (location.pathname + location.search + location.hash);
         if (!it.loc) { it.loc = siteLoc(); it.crumb = siteCrumb(); }
-        YGN.upsert(it); toast(ex ? '已保存' : '已存入笔记本（共 ' + YGN.all().length + ' 条）');
+        YGN.upsert(it); toast(ex ? '已保存' : '已存入全科笔记本（共 ' + YGN.all().length + ' 条）');
       }
       closeSheet(); paint();
     };
@@ -257,7 +257,7 @@
     hd.setAttribute('aria-label', '拖动调整笔记区高度');
     var f = document.createElement('iframe');
     f.src = HUB + 'notebook.html?embed=1&app=' + APP;
-    f.title = '笔记本'; f.style.cssText = 'flex:1;width:100%;border:0;display:block;background:#05070f;min-height:0';
+    f.title = '全科笔记本'; f.style.cssText = 'flex:1;width:100%;border:0;display:block;background:#05070f;min-height:0';
     nbBox.appendChild(hd); nbBox.appendChild(f); document.body.appendChild(nbBox);
     nbPad = document.body.style.paddingBottom;
     nbSet(window.innerHeight * frac);
@@ -327,7 +327,7 @@
       });
     })();
     var tip = document.createElement('div'); tip.id = 'ygnTip';
-    tip.innerHTML = '标记模式：点一段就能记 <button type="button" id="ygnTipNb" style="margin-left:8px;height:26px;padding:0 12px;border-radius:13px;border:1px solid #d9b877;background:#d9b877;color:#2a2108;font:600 12.5px sans-serif">笔记本</button>';
+    tip.innerHTML = '标记模式：点一段就能记 <button type="button" id="ygnTipNb" style="margin-left:8px;height:26px;padding:0 12px;border-radius:13px;border:1px solid #d9b877;background:#d9b877;color:#2a2108;font:600 12.5px sans-serif">全科笔记本</button>';
     tip.querySelector('#ygnTipNb').onclick = function (e) { e.stopPropagation(); if (nbBox) closeNotebook(); else openNotebook(); };
     document.body.appendChild(b); document.body.appendChild(tip);
     document.addEventListener('click', function (e) {

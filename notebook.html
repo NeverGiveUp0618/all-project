@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#05070f">
-<title>笔记本 · 易术堂</title>
+<title>全科笔记本 · 易术堂</title>
 <link rel="icon" href="icon192.png">
 <link rel="apple-touch-icon" href="icon180.png">
 <style>
@@ -44,6 +44,8 @@ a{color:inherit}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{height:32px;padding:0 12px;border-radius:16px;border:1px solid rgba(255,255,255,.16);background:transparent;color:var(--ink2);font-size:13px;white-space:nowrap}
 .chip em{font-style:normal;color:var(--dim);margin-left:5px;font-size:12px}
+.chip.dim{opacity:.5;border-style:dashed}
+.chip.dim.on{opacity:1}
 .chip.on{background:var(--c,var(--gold));border-color:var(--c,var(--gold));color:#1a1405;font-weight:700}
 .chip.on em{color:rgba(26,20,5,.7)}
 .row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
@@ -125,7 +127,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
 <body>
 <div class="bar"><div class="bar-in">
   <a class="back" id="back" href="./">‹ 易术堂</a>
-  <h1>笔 记 本</h1>
+  <h1>全 科 笔 记 本</h1>
   <button class="ib hot" id="bRv" type="button">复习 <b id="nDue">0</b></button>
   <button class="ib" id="bMore" type="button">导出</button>
 </div></div>
@@ -202,6 +204,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
 (function () {
   var Y = window.YGN, $ = function (s) { return document.querySelector(s); };
   var KC = { key: '#d9b877', q: '#e07a6a', ok: '#7fc3a8' };
+  var SUBJECTS = ['jingjiang', 'mangpai', 'lrcourse', 'xiangfa', 'fengshui', 'zeri', 'other'];
   var st = { q: '', kind: '', app: '', tag: '', sort: 'new', memo: false, grp: true };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function ymd(t) { var d = new Date(t); return (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
@@ -260,8 +263,8 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
     $('#stack').innerHTML = ['key', 'q', 'ok'].map(function (k) { return '<i style="width:' + (cnt[k] || 0) / n * 100 + '%;background:' + KC[k] + '"></i>'; }).join('');
     $('#legend').innerHTML = ['key', 'q', 'ok'].map(function (k) { return '<span style="--c:' + KC[k] + '">' + Y.KINDS[k].n + ' ' + (cnt[k] || 0) + '</span>'; }).join('');
     $('#kinds').innerHTML = chip('', '全部', all.length, st.kind === '') + ['key', 'q', 'ok'].map(function (k) { return chip(k, Y.KINDS[k].n, cnt[k] || 0, st.kind === k, KC[k]); }).join('');
-    var ak = Object.keys(byApp).sort(function (a, b) { return byApp[b] - byApp[a]; });
-    $('#apps').innerHTML = chip('', '全部', all.length, st.app === '') + ak.map(function (k) { return chip(k, appInfo(k).n, byApp[k], st.app === k, appInfo(k).c); }).join('');
+    var ak = SUBJECTS.concat(Object.keys(byApp).filter(function (k) { return SUBJECTS.indexOf(k) < 0; }));   // 固定列全部科目；没笔记的先空着
+    $('#apps').innerHTML = chip('', '全部', all.length, st.app === '') + ak.map(function (k) { return chip(k, appInfo(k).n, byApp[k] || 0, st.app === k, appInfo(k).c, !byApp[k]); }).join('');
     var tk = Object.keys(tags).sort(function (a, b) { return tags[b] - tags[a]; });
     $('#tags').innerHTML = tk.length ? chip('', '全部', '', st.tag === '') + tk.map(function (g) { return chip(g, '#' + g, tags[g], st.tag === g, '#8fd3e0'); }).join('') : '<span class="hint">还没有标签</span>';
     document.querySelector('.tagsec').style.display = tk.length ? '' : 'none'; $('#tags').style.display = tk.length ? '' : 'none';
@@ -269,6 +272,9 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
     var list = sorted(filtered(all)), out = '';
     if (!all.length) {
       out = '<div class="empty"><h3>还没有笔记</h3><p>在任意学习站里点右下角的 <span class="pen">笔</span> 进入标记模式，再点一段文字，就能存进这里。</p><p>也可以点右下角 ＋ 直接写一条随记。</p></div>';
+    } else if (!list.length && st.app && !byApp[st.app] && !st.q && !st.kind && !st.tag && !st.memo) {
+      var ai = appInfo(st.app);
+      out = '<div class="empty"><h3>' + ai.n + ' · 还没有笔记</h3><p>' + (ai.dir ? '先空着也没关系。在「' + ai.n + '」里点左侧的 <span class="pen">笔</span> 标记一段，就会出现在这里。' : '点右下角 ＋ 写一条随记，就会归到这里。') + '</p>' + (ai.dir ? '<p><a href="view.html?app=' + st.app + '" style="color:var(--gold)">去「' + ai.n + '」 ›</a></p>' : '') + '</div>';
     } else if (!list.length) {
       out = '<div class="empty"><h3>没有符合条件的笔记</h3><p>换个关键词，或点「全部」清掉筛选。</p></div>';
     } else if (st.grp && st.sort !== 'src') {
@@ -279,10 +285,14 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
     } else out = list.map(cardHtml).join('');
     var on = (st.kind ? 1 : 0) + (st.app ? 1 : 0) + (st.tag ? 1 : 0) + (st.memo ? 1 : 0);
     $('#fxBtn').style.color = on ? 'var(--gold)' : ''; $('#fxBtn').dataset.on = on;
+    if (all.length && !st.app && !st.q && !st.kind && !st.tag && !st.memo) {
+      var em = SUBJECTS.filter(function (k) { return !byApp[k] && k !== 'other'; });
+      if (em.length) out += '<p class="hint" style="text-align:center;margin:22px 0 4px">还没有笔记的科目：' + em.map(function (k) { return appInfo(k).n; }).join('、') + '（先空着，用到再记）</p>';
+    }
     $('#list').innerHTML = out;
     render.cur = list;
   }
-  function chip(v, label, n, on, c) { return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-v="' + esc(v) + '"' + (c ? ' style="--c:' + c + '"' : '') + '>' + esc(label) + (n !== '' ? '<em>' + n + '</em>' : '') + '</button>'; }
+  function chip(v, label, n, on, c, dim) { return '<button type="button" class="chip' + (on ? ' on' : '') + (dim ? ' dim' : '') + '" data-v="' + esc(v) + '"' + (c ? ' style="--c:' + c + '"' : '') + '>' + esc(label) + (n !== '' ? '<em>' + n + '</em>' : '') + '</button>'; }
 
   $('#kinds').onclick = function (e) { var b = e.target.closest('.chip'); if (b) { st.kind = b.dataset.v; render(); } };
   $('#apps').onclick = function (e) { var b = e.target.closest('.chip'); if (b) { st.app = b.dataset.v; render(); } };
@@ -370,7 +380,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
   function mdAll() {
     var list = sorted(filtered(Y.all())), g = {}, order = [];
     list.forEach(function (x) { if (!g[x.app]) { g[x.app] = []; order.push(x.app); } g[x.app].push(x); });
-    var o = '# 易术堂笔记本\n\n导出于 ' + new Date().toLocaleDateString() + ' · 共 ' + list.length + ' 条\n\n';
+    var o = '# 易术堂全科笔记本\n\n导出于 ' + new Date().toLocaleDateString() + ' · 共 ' + list.length + ' 条\n\n';
     order.forEach(function (k) {
       o += '## ' + appInfo(k).n + '\n\n';
       var lastT = null;
@@ -383,8 +393,8 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
   $('#mClose').onclick = function () { $('#mMore').classList.remove('on'); };
   $('#mMore').onclick = function (e) { if (e.target === this) this.classList.remove('on'); };
   $('#xMd').onclick = function () { copy(mdAll()); };
-  $('#xMdF').onclick = function () { dl('易术堂笔记本.md', mdAll(), 'text/markdown'); };
-  $('#xJs').onclick = function () { dl('易术堂笔记本-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify({ v: 1, items: Y.all() }), 'application/json'); };
+  $('#xMdF').onclick = function () { dl('易术堂全科笔记本.md', mdAll(), 'text/markdown'); };
+  $('#xJs').onclick = function () { dl('易术堂全科笔记本-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify({ v: 1, items: Y.all() }), 'application/json'); };
   $('#xIn').onchange = function () {
     var f = this.files[0]; if (!f) return; var r = new FileReader();
     r.onload = function () {
@@ -410,7 +420,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
     var n = rv.q.length; $('#rvBar').style.width = (rv.i / n * 100) + '%'; $('#rvN').textContent = Math.min(rv.i + 1, n) + ' / ' + n;
     if (rv.i >= n) {
       $('#rvBody').innerHTML = '<div class="rv-done"><h3>今日复习完成</h3><p style="color:var(--ink2)">记得 ' + rv.g + ' · 模糊 ' + rv.f + ' · 忘了 ' + rv.x + '</p><p style="color:var(--dim);font-size:13px">记得的会隔更久再出现，模糊和忘了的明天再来。</p></div>';
-      $('#rvBtns').innerHTML = '<button type="button" class="s" id="rvEnd">回到笔记本</button>'; $('#rvEnd').onclick = endReview; return;
+      $('#rvBtns').innerHTML = '<button type="button" class="s" id="rvEnd">回到全科笔记本</button>'; $('#rvEnd').onclick = endReview; return;
     }
     var it = Y.get(rv.q[rv.i]); if (!it) { rv.i++; rvDraw(); return; }
     var a = appInfo(it.app);
