@@ -225,6 +225,7 @@
         it.kind = kind; it.memo = memo; it.title = it.title || heading(b);
         it.path = it.path || (location.pathname + location.search + location.hash);
         if (!it.loc) { it.loc = siteLoc(); it.crumb = siteCrumb(); }
+        if (it.pos == null) { try { it.pos = Array.prototype.indexOf.call(document.querySelectorAll(BLKS()), b); } catch (e) {} }
         YGN.upsert(it); toast(ex ? '已保存' : '已存入全科笔记本（共 ' + YGN.all().length + ' 条）');
       }
       closeSheet(); paint();

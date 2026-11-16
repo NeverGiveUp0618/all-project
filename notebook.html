@@ -59,6 +59,8 @@ body.embed .side>.panel:first-child{display:none}body.embed .side>.panel{margin-
 .grp{font-size:13px;letter-spacing:.2em;color:var(--gold);margin:18px 2px 8px;display:flex;align-items:center;gap:8px}
 .grp::after{content:"";flex:1;height:1px;background:var(--line)}
 .grp:first-child{margin-top:2px}
+.chp{font-size:12.5px;color:var(--cyan);letter-spacing:.06em;margin:12px 2px 6px;padding-left:9px;border-left:2px solid var(--cyan-dim, #5fa7b4);display:flex;align-items:center;gap:6px}
+.chp em{font-style:normal;font-size:11px;color:var(--ink-dim,#8a94ac)}
 .card{position:relative;margin:0 0 10px;padding:12px 14px 10px 17px;border:1px solid var(--line);background:var(--card);border-radius:14px;overflow:hidden}
 .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kc)}
 .card.ok{opacity:.72}
@@ -152,7 +154,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
       <div class="sec tagsec">标签</div>
       <div class="chips tags" id="tags"></div>
       <div class="row2">
-        <select class="sel" id="sort"><option value="new">最新在前</option><option value="old">最早在前</option><option value="src">按出处</option><option value="due">复习临近</option></select>
+        <select class="sel" id="sort"><option value="src">教材顺序</option><option value="new">最新在前</option><option value="old">最早在前</option><option value="due">复习临近</option></select>
         <label class="chk"><input type="checkbox" id="fMemo"> 只看有批注</label>
         <label class="chk"><input type="checkbox" id="fGrp" checked> 按科目分组</label>
       </div>
@@ -206,7 +208,7 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
   var Y = window.YGN, $ = function (s) { return document.querySelector(s); };
   var KC = { key: '#d9b877', q: '#e07a6a', ok: '#7fc3a8' };
   var SUBJECTS = ['jingjiang', 'mangpai', 'lrcourse', 'xiangfa', 'fengshui', 'zeri', 'other'];
-  var st = { q: '', kind: '', app: '', tag: '', sort: 'new', memo: false, grp: true };
+  var st = { q: '', kind: '', app: '', tag: '', sort: 'src', memo: false, grp: true };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function ymd(t) { var d = new Date(t); return (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
   function toast(msg, label, fn) {
@@ -229,11 +231,39 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
       return true;
     });
   }
+  /* 教材顺序：科目 → 章节（按 loc 里的章号） → 段落在页面里的位置 → 存入时间 */
+  var LK = ['c', 'b', 'cat', 'id', 'n', 'node'], SCR0 = ['chapter', 'lec', 'tb'];
+  function numStr(a, b) { return String(a).localeCompare(String(b), 'zh', { numeric: true }); }
+  function bookCmp(x, y) {
+    var ax = SUBJECTS.indexOf(x.app), ay = SUBJECTS.indexOf(y.app);
+    if (ax !== ay) return (ax < 0 ? 99 : ax) - (ay < 0 ? 99 : ay);
+    var lx = x.loc, ly = y.loc;
+    if (!!lx !== !!ly) return lx ? -1 : 1;                      // 有位置信息的排前面
+    if (lx) {
+      var sx = String(lx.scr || lx.k || lx.v || lx.tab || ''), sy = String(ly.scr || ly.k || ly.v || ly.tab || '');
+      var rx = SCR0.indexOf(sx), ry = SCR0.indexOf(sy);
+      if (rx !== ry) return (rx < 0 ? 99 : rx) - (ry < 0 ? 99 : ry);
+      if (sx !== sy) return numStr(sx, sy);
+      for (var i = 0; i < LK.length; i++) {
+        var a = lx[LK[i]], b = ly[LK[i]];
+        if (a == null && b == null) continue;
+        if (a == null || b == null) return a == null ? 1 : -1;
+        var na = parseFloat(a), nb = parseFloat(b);
+        if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+        if (String(a) !== String(b)) { var c = numStr(a, b); if (c) return c; }
+      }
+    } else {
+      var c2 = numStr(x.crumb || x.title || '', y.crumb || y.title || ''); if (c2) return c2;
+    }
+    var px = x.pos == null ? 1e9 : x.pos, py = y.pos == null ? 1e9 : y.pos;
+    if (px !== py) return px - py;
+    return x.t - y.t;
+  }
   function sorted(a) {
     var s = a.slice(), by = st.sort;
     if (by === 'old') s.sort(function (x, y) { return x.t - y.t; });
     else if (by === 'due') s.sort(function (x, y) { return ((x.rv && x.rv.due) || 0) - ((y.rv && y.rv.due) || 0); });
-    else if (by === 'src') s.sort(function (x, y) { return (x.title || '').localeCompare(y.title || '', 'zh') || x.t - y.t; });
+    else if (by === 'src') s.sort(bookCmp);
     else s.sort(function (x, y) { return y.t - x.t; });
     return s;
   }
@@ -282,7 +312,11 @@ mark{background:rgba(217,184,119,.38);color:inherit;border-radius:3px;padding:0 
       var g = {}, order = []; list.forEach(function (x) { if (!g[x.app]) { g[x.app] = []; order.push(x.app); } g[x.app].push(x); });
       order.forEach(function (k) { out += '<div class="grp">' + appInfo(k).n + ' · ' + g[k].length + '</div>' + g[k].map(cardHtml).join(''); });
     } else if (st.sort === 'src') {
-      var last = ''; list.forEach(function (x) { var h = appInfo(x.app).n + ' · ' + (x.title || '（无出处）'); if (h !== last) { out += '<div class="grp">' + esc(h) + '</div>'; last = h; } out += cardHtml(x); });
+      var lastA = '', lastC = null, cn = {}; list.forEach(function (x) { var c = x.crumb || x.title || ''; var kk = x.app + '|' + c; cn[kk] = (cn[kk] || 0) + 1; });
+      list.forEach(function (x) { var c = x.crumb || x.title || '';
+        if (x.app !== lastA) { out += '<div class="grp">' + appInfo(x.app).n + '</div>'; lastA = x.app; lastC = null; }
+        if (c !== lastC) { out += '<div class="chp">' + esc(c || '（未记录章节）') + '<em>' + cn[x.app + '|' + c] + '</em></div>'; lastC = c; }
+        out += cardHtml(x); });
     } else out = list.map(cardHtml).join('');
     var on = (st.kind ? 1 : 0) + (st.app ? 1 : 0) + (st.tag ? 1 : 0) + (st.memo ? 1 : 0);
     $('#fxBtn').style.color = on ? 'var(--gold)' : ''; $('#fxBtn').dataset.on = on;
