@@ -1,7 +1,7 @@
-const CACHE = 'mingli-home-v46-bookorder';
+const CACHE = 'mingli-home-v47-luopan';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
-                './backup.html', './check.html', './guard.js', './notebook.html', './notes.js'];
+                './backup.html', './check.html', './guard.js', './notebook.html', './notes.js', './reader.js', './luopan/', './luopan/index.html', './luopan/style.css', './luopan/data.js', './luopan/model.js', './luopan/app.js', './luopan/reference.js', './luopan/reference/wide.jpg', './luopan/reference/detail.jpg'];
 
 self.addEventListener('install', e => {
   // ⚠️ addAll 必须兜底：任何一个资源取不到都会让 install 失败，
@@ -16,7 +16,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('mingli-home-') && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

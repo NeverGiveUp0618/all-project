@@ -99,6 +99,11 @@ if (!ls) {
       if (st && +st.days > 0) p.push('连续 ' + st.days + ' 天');
       return p.join(' · ');
     }],
+    ['罗盘学习', function () {
+      var s=J('luopan_learning_v1',{}),items=s.items||{},n=Object.keys(items).length,w=0;
+      for(var k in items)if(items[k]&&items[k].active)w++;
+      return n?n+' 个考点 · '+w+' 个待订正':'';
+    }],
     ['杨公背诵', function () {
       var s2 = J('yangpu', {}); var n = Object.keys(s2).length;
       return n ? n + ' 本有记录' : '';

@@ -17,6 +17,7 @@
     fengshui:  { n: '风水识形', g: '峦', dir: 'fengshui',        c: '#7fc3a8' },
     zeri:      { n: '择日学习', g: '日', dir: 'zeri',            c: '#e3c26f' },
     lenormand: { n: '雷诺曼',   g: '牌', dir: 'lenormand',       c: '#e58fb0' },
+    luopan:    { n: '罗盘学习', g: '盘', dir: 'luopan',          c: '#c79450' },
     other:     { n: '随记',     g: '记', dir: '',                c: '#9aa7c4' }
   };
   var KINDS = { key: { n: '重点', c: '217,184,119' }, q: { n: '疑问', c: '224,122,106' }, ok: { n: '已会', c: '127,195,168' } };
