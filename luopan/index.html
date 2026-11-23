@@ -8,9 +8,9 @@
 <section class="instrument" aria-label="二十九层综合盘学习工具">
 <div class="bearing"><div><span>前方 · 向</span><strong id="front-reading">辰向 东南115.7°</strong></div><div><span>后方 · 坐</span><strong id="back-reading">戌山 西北295.7°</strong></div></div>
 <div class="dial-heading"><span id="stage-tag">地盘二十四山</span><button class="quiet" data-act="lock" id="board-lock" aria-pressed="false"><span>锁定朝向</span></button></div>
-<div id="compass-stage" class="compass-stage" tabindex="0" aria-label="拖动旋转，双指缩放移动；方向键微调，长按查看罗层"><svg id="compass-svg" viewBox="0 0 1200 1200" role="img" aria-label="矢量学习盘与红色十字线"></svg></div>
-<div class="board-controls"><button class="square" data-act="zoom-out" aria-label="缩小盘面">−</button><output id="zoom-value" aria-label="放大倍数">1×</output><button class="square" data-act="zoom-in" aria-label="放大盘面">＋</button><button class="quiet" data-act="focus-layer">看清本层</button><button class="quiet" data-act="reset-pan">全盘</button><button class="quiet" data-act="gesture" id="gesture-mode" aria-pressed="false">拖动：旋转</button></div>
-<p class="gesture-help">拖动转盘 · 双指缩放移动 · 长按选层</p>
+<div id="compass-stage" class="compass-stage" tabindex="0" aria-label="单指旋转，双指移动与缩放；方向键微调，长按查看罗层"><svg id="compass-svg" viewBox="0 0 1200 1200" role="img" aria-label="矢量学习盘与红色十字线"></svg></div>
+<div class="board-controls"><button class="square" data-act="zoom-out" aria-label="缩小盘面">−</button><output id="zoom-value" aria-label="放大倍数">1×</output><button class="square" data-act="zoom-in" aria-label="放大盘面">＋</button><button class="quiet" data-act="focus-layer">看清本层</button><button class="quiet" data-act="reset-pan">全盘</button></div>
+<p class="gesture-help">单指旋转 · 双指移动与缩放 · 长按选层</p>
 <div class="angle-control"><label for="bearing-number">前方度数</label><div><button class="square" data-step="-1" aria-label="减少一度">−1°</button><input id="bearing-number" type="number" min="0" max="360" step="0.1" value="115.7" inputmode="decimal"><span>°</span><button class="square" data-step="1" aria-label="增加一度">＋1°</button></div><input id="bearing-range" type="range" min="0" max="359.9" step="0.1" value="115.7" aria-label="前方朝向度数"></div>
 <details class="mountain-shortcuts"><summary>二十四山快速定位</summary><div class="compass-jumps" id="mountain-jumps" aria-label="二十四山快速定位"></div></details>
 <p class="source-small plate-status">拖动研习盘，熟悉每圈的位置；先看度数，再读红线所压的格。</p>

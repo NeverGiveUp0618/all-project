@@ -15,3 +15,6 @@
 @media(max-width:380px){.bottom-nav a{gap:4px;padding-left:3px;padding-right:3px}.bottom-nav a>span{width:24px;height:24px}}
 
 .layer-select-label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}#layer-select{width:100%;min-width:0;background:#15273a;border:1px solid var(--line);color:var(--ink);font-size:14px;padding:11px 28px 11px 11px;border-radius:8px}.ring-picker{display:block}.quick-rings{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.compass-stage text,.original-band text,.read-figure text{font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-weight:400}.compass-stage .ring{isolation:isolate}
+
+/* Keep the dense vector disk on a reusable compositing layer during rotation. */
+#compass-svg .disc{will-change:transform;transform-origin:0px 0px}
