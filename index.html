@@ -109,6 +109,7 @@
   .txt{flex:1; min-width:0;}
   .t-main{font-size:18px; font-weight:600; letter-spacing:.1em;}
   .t-sub{font-size:12px; color:var(--ink-dim); margin-top:4px; letter-spacing:.04em;}
+  .summary-item{display:inline-block;}
   .no{font:600 12px/1 "PingFang SC",sans-serif; color:var(--cyan-dim); letter-spacing:.1em; flex:0 0 auto;}
   .arrow{color:var(--gold); font-size:21px; opacity:.5; flex:0 0 auto; transition:transform .2s,opacity .2s;}
   .card:hover .arrow{opacity:1; transform:translateX(3px);}
@@ -276,25 +277,25 @@
 
       <a class="card" data-app="mangpai" href="view.html?app=mangpai">
         <div class="ic">盲</div>
-        <div class="txt"><div class="t-main">盲派八字</div><div class="t-sub">初中高级课程 · 专题答疑 · 命例库</div>
+        <div class="txt"><div class="t-main">盲派八字</div><div class="t-sub"><span class="summary-item">78讲教材</span> · <span class="summary-item">19课初级白话</span> · <span class="summary-item">864道章末题</span></div>
           <div class="badge"></div></div>
         <span class="no">壹</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="bazi" href="view.html?app=bazi">
         <div class="ic">卦</div>
-        <div class="txt"><div class="t-main">八字日练</div><div class="t-sub">五模式练习 · 学习计划</div>
+        <div class="txt"><div class="t-main">八字日练</div><div class="t-sub"><span class="summary-item">教材知识点</span> · <span class="summary-item">断盘陪练</span> · <span class="summary-item">错题复习</span></div>
           <div class="badge"></div></div>
         <span class="no">贰</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="xiangfa" href="view.html?app=xiangfa">
         <div class="ic">象</div>
-        <div class="txt"><div class="t-main">象义随身</div><div class="t-sub">四术共象 · 查共象 · 推导练</div>
+        <div class="txt"><div class="t-main">象义随身</div><div class="t-sub"><span class="summary-item">断事图</span> · <span class="summary-item">八字与六壬</span> · <span class="summary-item">共象速查</span></div>
           <div class="badge"></div></div>
         <span class="no">叁</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="zeri" href="view.html?app=zeri">
         <div class="ic">日</div>
-        <div class="txt"><div class="t-main">择日学习</div><div class="t-sub">查 · 算 · 学 三模式</div>
+        <div class="txt"><div class="t-main">择日学习</div><div class="t-sub"><span class="summary-item">1413道教材题</span> · <span class="summary-item">452个名词</span> · <span class="summary-item">446道名词题</span></div>
           <div class="badge"></div></div>
         <span class="no">肆</span><span class="arrow">&#8250;</span>
       </a>
@@ -318,13 +319,13 @@
       </a>
       <a class="card" data-app="jingjiang" href="view.html?app=jingjiang">
         <div class="ic">讲</div>
-        <div class="txt"><div class="t-main">命理精讲</div><div class="t-sub">教材通读 · 命例题库 · 逐题拆解</div>
+        <div class="txt"><div class="t-main">命理精讲</div><div class="t-sub"><span class="summary-item">16章教材</span> · <span class="summary-item">24篇笔记</span> · <span class="summary-item">812道命例题</span></div>
           <div class="badge"></div></div>
         <span class="no">捌</span><span class="arrow">&#8250;</span>
       </a>
       <a class="card" data-app="lrcourse" href="view.html?app=lrcourse">
         <div class="ic">壬</div>
-        <div class="txt"><div class="t-main">六壬神课</div><div class="t-sub">一课一课 · 起盘台 · 格局毕法</div>
+        <div class="txt"><div class="t-main">六壬神课</div><div class="t-sub"><span class="summary-item">通解25课</span> · <span class="summary-item">初中级20课</span> · <span class="summary-item">426条速查</span></div>
           <div class="badge"></div></div>
         <span class="no">玖</span><span class="arrow">&#8250;</span>
       </a>
@@ -383,6 +384,10 @@
   document.getElementById('ring-in').innerHTML=inn;
 })();
 
+/* SITE_COUNTS_START */
+window.YST_COUNTS={"mangpai":{"plain":19,"qna":11,"selftest":864,"course":78,"rawCourse":85,"notes":19,"quiz":936,"quizChart":936,"quizChai":936},"jingjiang":{"course":16,"notes":24,"quiz":812,"quizChart":780,"quizChai":522},"lrcourse":{"lesson":25,"basicLesson":20,"planned":25,"pan":10,"basicPan":14,"cite":407,"ref":160,"basicRef":266,"ge":66,"extra":5,"xf":295,"bifa":100,"bifage":356,"jinsuo":94,"jinsuob":41,"quiz":189,"quizstar":81,"mufu":80,"tongjie":842},"zeri":{"questions":1413,"chapters":72,"terms":452,"termQuestions":446}};
+/* SITE_COUNTS_END */
+
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
 // 同域共享 localStorage,直接读各App的真实存储键
 (function(){
@@ -390,6 +395,8 @@
   function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
   function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
+  var C=window.YST_COUNTS;
+  function total(app,field,cached){return Math.max(+cached||0,+C[app][field]||0);}
   var STAT={
     // bazi_cat_stats: {类目:{a:答题数, e:错数}}  ——与 updateCatStats() 一致
     bazi:function(){
@@ -399,15 +406,19 @@
       return (a||tc) ? '连续打卡 <b>'+ds+'</b> 天 · 累计对题 <b>'+tc+'</b>'+(a?' · 综合正确率 <b>'+Math.round((a-e)/a*100)+'%</b>':'') : null;
     },
     // ⚠️ 六壬神课(liuren-game) 2026-10-22 退役并入六壬课程，卡片与看板已撤（旧 lr_* 数据仍在，备份页照常认）
-    // zeri_wrong_v1: 错题Set; zeri_streak_v1: {last,days}
-    // 注意:择日的日期格式不补零(2026-7-13);days是存量,断签不会清零 → 需自行判定是否仍连续
+    // Current textbook and term banks share the core schema but keep separate records.
     zeri:function(){
-      var w=J('zeri_wrong_v1',[]),st=J('zeri_streak_v1',{}),p=[];
-      if(Array.isArray(w)&&w.length) p.push('错题 <b>'+w.length+'</b>');
-      function ds(t){ return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate(); }
-      var td=ds(new Date()), yd=ds(new Date(Date.now()-864e5));
-      if(st && +st.days>0 && (st.last===td || st.last===yd)) p.push('连续 <b>'+st.days+'</b> 天');
-      return p.length ? p.join(' · ') : null;
+      var p=[],modern=false;
+      [['zeri_qbank_v1','教材','questions'],['zeri_terms_v1','名词','termQuestions']].forEach(function(row){
+        var state=J(row[0],null);if(!state||state.v!==1)return;modern=true;
+        var seen=state.seen||{},wrong=state.wrong||{},n=Object.keys(seen).filter(function(k){return seen[k]&&typeof seen[k]==='object';}).length;
+        var w=Object.keys(wrong).filter(function(k){return wrong[k]&&wrong[k].active===true;}).length;
+        if(n||w)p.push(row[1]+'已练 <b>'+n+'</b>/'+C.zeri[row[2]]+' 题'+(w?' · 待订正 <b>'+w+'</b>':''));
+      });
+      if(modern)return p.length?p.join('<br>'):null;
+      // Archived-course records remain visible only when the new banks have no state.
+      var w=J('zeri_wrong_v1',[]);
+      return Array.isArray(w)&&w.length?'旧课程错题 <b>'+w.length+'</b>':null;
     },
     luopan:function(){
       var s=J('luopan_learning_v1',{}),items=s.items||{},n=Object.keys(items).length,w=0;
@@ -434,7 +445,7 @@
       }
       var seen=Object.keys(J('bazi_course_seen',{})).length;
       var c=J('bazi_course_counts',{});
-      var nCh=+c.course||16, nNt=+c.notes||15, nQz=+c.quiz||334;   // 仅在没打开过该App时用；真实值由App写入 bazi_course_counts
+      var nCh=total('jingjiang','course',c.course), nNt=total('jingjiang','notes',c.notes), nQz=total('jingjiang','quiz',c.quiz);   // 仅在没打开过该App时用；真实值由App写入 bazi_course_counts
       var p=[];
       if(ch) p.push('读完 <b>'+ch+'</b>/'+nCh+' 章');
       if(nt) p.push('笔记 <b>'+nt+'</b>/'+nNt+' 篇');
@@ -445,13 +456,12 @@
     // ⚠️ 分母读 liuren_course_counts.lesson(已写成的课数)——这套教材 25 课在陆续写,
     //    写死 3 过两周就不对了;没打开过该App时才退回当前已知的数,只是显示,不影响功能。
     lrcourse:function(){
-      var r=J('liuren_course_read',{}),done=0;
-      for(var k in r){ if((+r[k]||0)>=90) done++; }
+      var r=J('liuren_course_read',{}),done=0,basic=0,p=[];
+      for(var k in r){if((+r[k]||0)<90)continue;if(/^L\d{2}$/.test(k))done++;else if(/^B\d{2}$/.test(k))basic++;}
       var c=J('liuren_course_counts',{});
-      var n=+c.lesson||3, all=+c.planned||25;
-      var p=[];
-      if(done) p.push('读完 <b>'+done+'</b>/'+n+' 课');
-      return p.length ? p.join(' · ') : null;
+      if(done)p.push('通解读完 <b>'+done+'</b>/'+total('lrcourse','lesson',c.lesson)+' 课');
+      if(basic)p.push('初中级读完 <b>'+basic+'</b>/'+C.lrcourse.basicLesson+' 课');
+      return p.length?p.join(' · '):null;
     },
     // 风水识形(fengshui):guanshan_read {条目key:1} 已读; guanshan_srs {知识点id:{reviews}} 复习记录
     // ⚠️ 这一条 2026-08-24 才补——此前 STAT 里根本没有 fengshui,风水卡的进度从来就没显示过,
@@ -466,12 +476,13 @@
     },
     // 盲派八字(mangpai-course):mp_course_read {id:百分比} / mp_course_seen；分母读 mp_course_counts
     mangpai:function(){
-      var r=J('mp_course_read',{}),ch=0,nt=0;
-      for(var k in r){ if((+r[k]||0)<90) continue; if(k.charAt(0)==='c') ch++; else if(k.charAt(0)==='n') nt++; }
+      var r=J('mp_course_read',{}),ch=0,nt=0,plain=0;
+      for(var k in r){ if((+r[k]||0)<90) continue; if(k.charAt(0)==='c') ch++; else if(k.charAt(0)==='n') nt++; else if(/^bh\d+$/.test(k)) plain++; }
       var seen=Object.keys(J('mp_course_seen',{})).length, c=J('mp_course_counts',{}), p=[];
-      if(ch) p.push('读完 <b>'+ch+'</b>/'+(+c.course||68)+' 讲');
-      if(nt) p.push('专题 <b>'+nt+'</b>/'+(+c.notes||17)+' 篇');
-      if(seen) p.push('命例 <b>'+seen+'</b>/'+(+c.quiz||791)+' 题');
+      if(ch) p.push('读完 <b>'+ch+'</b>/'+total('mangpai','course',c.course)+' 讲');
+      if(nt) p.push('专题 <b>'+nt+'</b>/'+total('mangpai','notes',c.notes)+' 篇');
+      if(plain) p.push('白话 <b>'+plain+'</b>/'+total('mangpai','plain',c.plain)+' 课');
+      if(seen) p.push('命例 <b>'+seen+'</b>/'+total('mangpai','quiz',c.quiz)+' 题');
       return p.length ? p.join(' · ') : null;
     },
     // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录
@@ -493,7 +504,8 @@
     //    算不出来（App 换了存储键、或数据存在别处）才退回缓存。
     var t=null,cached=J('yst_stat_'+appKey,null);
     try{ t=f(); }catch(e){ t=null; }
-    if(!t && cached && cached.text && !/^(尚未|暂无|还没)/.test(cached.text)) t=cached.text;
+    var currentZeri=appKey==='zeri'&&((J('zeri_qbank_v1',{})||{}).v===1||(J('zeri_terms_v1',{})||{}).v===1);
+    if(!t && !currentZeri && cached && cached.text && !/^(尚未|暂无|还没)/.test(cached.text)) t=cached.text;
     if(t){ var b=c.querySelector('.badge'); b.innerHTML=t; b.className='badge on'; }
   });
 
