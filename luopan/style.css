@@ -33,3 +33,7 @@
 @media(max-width:380px){.visibility-list{grid-template-columns:1fr}.visibility-row{min-height:54px}}
 
 #visibility-drawer .drawer-head{position:sticky;top:0;background:#0e1a2a;z-index:1;padding:8px 0 12px;border-bottom:1px solid var(--line)}
+
+/* Zoom inside the SVG viewport; disable texture promotion for magnified text. */
+#compass-stage[data-render-mode="detail"] #dial-viewport,
+#compass-stage[data-render-mode="detail"] #dial-rotor{will-change:auto;backface-visibility:visible;contain:none;transform:none}

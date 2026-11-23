@@ -34,9 +34,31 @@ return h}
 function svgMarkup(mini=false,masked=false){return `<title>${mini?'二十四山定位练习简图':'二十九层综合盘：矢量文字与刻线，前方红线读向，后方红线读坐'}</title><g class="viewport"><g class="disc">${discMarkup(mini,masked)}</g><g class="layer-highlight" pointer-events="none"></g></g>${mini?`<g class="crosshair" fill="none" stroke="#e54c3c" stroke-width="2.1" pointer-events="none"><path d="M600 0V1200M0 600H1200"/><circle cx="600" cy="600" r="8" fill="#f9d69b" stroke="#8d301f"/></g><path d="M586 5L614 5L600 29Z" fill="#efbe62" stroke="#8d301f" pointer-events="none"/>`: ''}`}
 let plateRevision=0;
 function board(){const svg=$('#compass-svg');if(!svg.firstElementChild){svg.innerHTML=svgMarkup();svg.dataset.render='vector';plateRevision++;svg.querySelector('.viewport').setAttribute('transform','translate(600 600)')}applyVisibility();bindGestures($('#compass-stage'),false);$('#mountain-jumps').innerHTML=C.M.map((s,i)=>`<button data-shan="${i*15}" aria-label="定位${s}${i*15}度">${s}</button>`).join('');$('#ring-picker').innerHTML=`<label class="layer-select-label" for="layer-select">选择罗层</label><select id="layer-select">${L.map(l=>`<option value="${l.id}" ${l.id===layer?'selected':''}>${l.logical?'知识归类':('第'+l.order+'层')} · ${esc(l.name)}</option>`).join('')}</select><div class="quick-rings">${['di','ren','tian','fenjin','gua','xiu','degree'].map(id=>{const l=L.find(l=>l.id===id),label=({di:'地盘',ren:'人盘',tian:'天盘',fenjin:'分金',gua:'卦名',xiu:'宿度',degree:'度数'})[id];return `<button data-layer-select="${id}" aria-pressed="${id===layer}">${label}</button>`}).join('')}</div>`;updateBoard(true)}
-// Composite the HTML rotor as a whole. Never mutate the dense SVG during motion.
+// Only the unzoomed disk uses a composited HTML rotor. Zoomed text must be
+// rasterized from SVG at its final scale, never magnified from a cached texture.
 function cssTransform(el,value){if(el.style.transform!==value)el.style.transform=value}
-function updateTransform(svg,d,z=1,x=0,y=0){if(svg.id==='compass-svg'){cssTransform($('#dial-viewport'),`translate(${x/12}%, ${y/12}%) scale(${z})`);cssTransform($('#dial-rotor'),`rotate(${-d}deg)`);const cross=$('#compass-overlay .crosshair'),t=`translate(${x} ${y})`;if(cross.getAttribute('transform')!==t)cross.setAttribute('transform',t);const value=d.toFixed(1)+'°';if($('#live-bearing').value!==value)$('#live-bearing').value=value;return}svg.querySelector('.viewport').setAttribute('transform',`translate(${600+x} ${600+y}) scale(${z})`);svg.querySelector('.disc').setAttribute('transform',`rotate(${-d})`)}
+function svgTransform(el,value){if(el.getAttribute('transform')!==value)el.setAttribute('transform',value)}
+function updateTransform(svg,d,z=1,x=0,y=0){
+ if(svg.id==='compass-svg'){
+  const stage=$('#compass-stage'),detail=z>1,viewport=svg.querySelector('.viewport'),disc=svg.querySelector('.disc');
+  const renderMode=detail?'detail':'composite';if(stage.dataset.renderMode!==renderMode)stage.dataset.renderMode=renderMode;
+  if(detail){
+   cssTransform($('#dial-viewport'),'none');cssTransform($('#dial-rotor'),'none');
+   svgTransform(viewport,`translate(${600+x} ${600+y}) scale(${z})`);
+   svgTransform(disc,`rotate(${-d})`);
+  }else{
+   svgTransform(viewport,'translate(600 600)');svgTransform(disc,'rotate(0)');
+   cssTransform($('#dial-viewport'),`translate(${x/12}%, ${y/12}%)`);
+   cssTransform($('#dial-rotor'),`rotate(${-d}deg)`);
+  }
+  svgTransform($('#compass-overlay .crosshair'),`translate(${x} ${y})`);
+  const value=d.toFixed(1)+'°';if($('#live-bearing').value!==value)$('#live-bearing').value=value;
+  return;
+ }
+ svgTransform(svg.querySelector('.viewport'),`translate(${600+x} ${600+y}) scale(${z})`);
+ svgTransform(svg.querySelector('.disc'),`rotate(${-d})`);
+}
+
 const visibleRings=[{id:'pool',name:'天池',order:1},...physical];
 function renderVisibility(){const list=$('#visibility-list');if(!list.children.length)list.innerHTML=visibleRings.map(l=>`<label class="visibility-row"><input type="checkbox" data-ring-visible="${l.id}"><span><small>第${l.order}层</small>${esc(l.name)}</span></label>`).join('');list.querySelectorAll('input').forEach(el=>{el.checked=!hiddenLayers.has(el.dataset.ringVisible)});$('#visibility-count').textContent=`已显示 ${visibleRings.length-hiddenLayers.size} / ${visibleRings.length} 层`}
 function applyVisibility(){const svg=$('#compass-svg');for(const l of visibleRings){const el=svg.querySelector(`[data-layer="${l.id}"]`);if(el)el.style.display=hiddenLayers.has(l.id)?'none':''}renderVisibility()}
