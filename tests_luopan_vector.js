@@ -5,7 +5,7 @@ const dom=new JSDOM(html,{url:'https://example.test/all-project/luopan/',runScri
 const w=dom.window,$=s=>w.document.querySelector(s);
 const observers=[],NativeObserver=w.MutationObserver;w.MutationObserver=class extends NativeObserver{constructor(fn){super(fn);observers.push(this)}};
 w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=function(){};
-for(const f of ['data.js','model.js','plate-data.js','dial.js','guides.js','app.js'])w.eval(fs.readFileSync('luopan/'+f,'utf8'));
+for(const f of ['data.js','model.js','plate-data.js','dial.js','degree-memory.js','guides.js','app.js'])w.eval(fs.readFileSync('luopan/'+f,'utf8'));
 assert(w.LuopanApp,'initialization');
 assert(!$('#compass-svg image')&&!$('canvas'),'the entire board must be SVG text and geometry');
 assert(!html.includes('reference.js'),'no screenshot compositor');
@@ -86,7 +86,7 @@ const reload=new JSDOM(html,{url:'https://example.test/all-project/luopan/',runS
 const rw=reload.window;rw.scrollTo=()=>{};rw.HTMLElement.prototype.scrollIntoView=function(){};
 const reloadObservers=[],ReloadObserver=rw.MutationObserver;rw.MutationObserver=class extends ReloadObserver{constructor(fn){super(fn);reloadObservers.push(this)}};
 rw.localStorage.setItem(w.LuopanModel.KEY,JSON.stringify(saved));
-for(const f of ['data.js','model.js','plate-data.js','dial.js','guides.js','app.js'])rw.eval(fs.readFileSync('luopan/'+f,'utf8'));
+for(const f of ['data.js','model.js','plate-data.js','dial.js','degree-memory.js','guides.js','app.js'])rw.eval(fs.readFileSync('luopan/'+f,'utf8'));
 assert.equal(rw.document.querySelector('#compass-svg [data-layer="di"]').style.display,'none','reload restores hidden rings');
 assert(!rw.document.querySelector('[data-ring-visible="pool"]').checked,'reload restores checkbox state');
 reloadObservers.forEach(o=>o.disconnect());reload.window.close();
@@ -119,6 +119,19 @@ Object.defineProperty(w,'innerWidth',{value:390,writable:true});
 $('[data-act="layers"]').click();assert($('#layers-drawer #inline-panel'));
 $('[data-act="close-drawers"]').click();assert($('.desktop-panel #inline-panel'));
 console.log('✓ 12倍在SVG内部放大，停用低分辨率合成缓存；回到1倍恢复独立旋转');
+// The user's complete mnemonic text is transferred, not rewritten or renumbered.
+const source=fs.readFileSync('../yangong-beisong/index.html','utf8'),a=source.indexOf('const DG_CODE='),b=source.indexOf('const dgCode=',a),reference={};
+require('vm').runInNewContext(source.slice(a,b)+';this.data={codes:DG_CODE,items:DG,groups:DG_GROUPS}',reference);
+assert.deepEqual(JSON.parse(JSON.stringify(w.LUOPAN_DEGREE_MEMORY)),JSON.parse(JSON.stringify(reference.data)));
+assert(!$('#degree-memory').open);assert.equal(w.document.querySelectorAll('.degree-memory-item').length,24);assert([...w.document.querySelectorAll('.degree-memory-item')].every(d=>!d.open));
+assert.equal(w.document.querySelectorAll('.memory-code-grid span').length,20);assert.equal($('.memory-code-grid b').textContent,'00');
+$('[data-memory-turn="120"]').click();assert.equal(w.LuopanApp.degree,120);assert.equal(w.LuopanApp.layer,'di');
+const mem=$('#degree-memory-辰 p');mem.dispatchEvent(new w.Event('pointerdown',{bubbles:true}));assert.equal(w.YGN_HOOK.loc().scr,'degree-memory');assert.equal(w.YGN_HOOK.loc().id,'辰');
+w.YGN_HOOK.go({scr:'degree-memory',id:'辰'});assert($('#degree-memory').open&&$('#degree-memory-辰').open);
+console.log('✓ 杨公背诵24条原文及20项编码逐字相同，默认折叠、转盘验证与笔记定位通过');
+const bg=$('#compass-svg [data-hit-ring="di"]');
+for(const type of ['pointerdown','pointerup']){const e=new w.Event(type,{bubbles:true,cancelable:true});Object.assign(e,{pointerId:8,clientX:200,clientY:200,button:0});bg.dispatchEvent(e)}
+assert.equal(w.LuopanApp.layer,'di','background clicks still select the correct layer after paint separation');
 console.log('✓ 主盘与局部均为真矢量，全部已录字格可见，12倍缩放不引入图片');
 console.log('✓ 无仿应用水平仪与实景，转动复用字形，小屏讲解面板可开关');
 observers.forEach(o=>o.disconnect());dom.window.close();

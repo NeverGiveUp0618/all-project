@@ -15,9 +15,9 @@ function small(s,a,r,h,maxw,color=BLACK){if(!s)return '';const fs=Math.min(h*.64
 function stack(s,a,r,h,maxw,color=BLACK){if(!s.trim())return '';const chars=[...s],fs=Math.min(h/(chars.length+1.4),maxw*.74),step=fs*1.04;return `<text transform="rotate(${a})" text-anchor="middle" dominant-baseline="central" font-size="${fs}" fill="${color}">${chars.map((ch,j)=>`<tspan x="0" y="${-r+(j-(chars.length-1)/2)*step}">${esc(ch)}</tspan>`).join('')}</text>`}
 function star(c,l){const a=c.start+c.width/2,h=l.r1-l.r0,r=(l.r0+l.r1)/2,span=c.width*TAU*r,s=c.label,fs=Math.min(h*.40,span/(s.length+.5)*.80),col=c.element==='火'?RED:c.element==='木'?'#00870a':c.element==='水'?'#0814d5':c.element==='金'?'#fffbd5':'#ffef00',ink=['火','木','水'].includes(c.element)?'#fff79e':BLACK;
 // Separate the curved main label from the small element row, including very narrow宿格.
-return `<path d="${sector(l.r0,l.r1,c.start,c.width)}" fill="${col}" stroke="${LINE}" stroke-width=".45"/>`+[...s].map((ch,i)=>text(ch,a+(i-(s.length-1)/2)*fs/r/TAU,r+h*.19,fs,{color:ink})).join('')+text(c.element,c.start+c.width*.80,l.r0+h*.22,Math.min(h*.18,span*.18),{color:ink});}
+return ''+[...s].map((ch,i)=>text(ch,a+(i-(s.length-1)/2)*fs/r/TAU,r+h*.19,fs,{color:ink})).join('')+text(c.element,c.start+c.width*.80,l.r0+h*.22,Math.min(h*.18,span*.18),{color:ink});}
 function cell(c,l){const h=l.r1-l.r0,r=(l.r0+l.r1)/2,a=c.start+c.width/2,w=2*r*Math.sin(c.width*TAU/2),kind=l.kind,ink=c.bg&&['#ed0b08','#00870a','#0814d5'].includes(c.bg)?'#fff8a6':BLACK;
-let g=kind==='stars'?star(c,l):`<path d="${sector(l.r0,l.r1,c.start,c.width)}" fill="${c.bg||YELLOW}" stroke="${LINE}" stroke-width="${c.width<2?.24:.4}"/>`;
+let g=kind==='stars'?star(c,l):'';
 if(kind==='stars')return g;
 if(kind==='trigram'){
  const b=bits[c.label]||'000',bar=Math.min(w*.3,h*.9),gap=h*.09,top=-r-h*.28;
@@ -56,8 +56,15 @@ if(kind==='marks'){
 if(kind==='yaodirection')return g+text(c.label,a,r-h*.13,h*.47)+text(c.left,c.start+c.width*.12,l.r1-h*.23,h*.31)+text(c.right,c.start+c.width*.88,l.r1-h*.23,h*.31);
 return g+(kind==='stack'?stack(c.label,a,r,h,w,ink):small(c.label,a,r,h,w,ink))+(c.left?small(c.left,a,r-h*.25,h*.4,w,ink):'');
 }
+function cellBackground(c,l){const fill=l.kind==='stars'?({'火':RED,'木':'#00870a','水':'#0814d5','金':'#fffbd5'})[c.element]||'#ffef00':c.bg||YELLOW;return `<path data-hit-ring="${l.id}" d="${sector(l.r0,l.r1,c.start,c.width)}" fill="${fill}" stroke="${LINE}" stroke-width="${l.kind==='stars'?.45:c.width<2?.24:.4}"/>`}
 const ringCache=new Map();
-function ring(l){if(!ringCache.has(l.id))ringCache.set(l.id,`<g class="ring" data-layer="${l.id}">${l.cells.map((c,i)=>`<g data-ring="${l.id}" data-cell="${i}">${cell(c,l)}</g>`).join('')}</g>`);return ringCache.get(l.id)}
+function ring(l){if(!ringCache.has(l.id)){
+ // Paint every cell background first. Boundary markers must stay above both cells.
+ const background=`<g class="ring-backgrounds">${l.cells.map(c=>cellBackground(c,l)).join('')}</g>`;
+ const ink=`<g class="ring-ink">${l.cells.map((c,i)=>`<g data-ring="${l.id}" data-cell="${i}">${cell(c,l)}</g>`).join('')}</g>`;
+ ringCache.set(l.id,`<g class="ring" data-layer="${l.id}">${background}${ink}</g>`);
+ }return ringCache.get(l.id)}
+
 function pool(){let s=`<circle r="${P.poolRadius}" fill="#fffce4" stroke="#ad8c3b" stroke-width="2.3"/><circle r="${P.poolRadius-4}" fill="#fffefa" stroke="#a8a391" stroke-width=".6"/>`;
 for(let i=0;i<72;i++)s+=`<path d="M${pair(polar(P.poolRadius-8,i*5))}L${pair(polar(P.poolRadius-5,i*5))}" stroke="#8c8c82" stroke-width=".35"/>`;
 for(const [i,ch] of ['北','东','南','西'].entries())s+=text(ch,i*90,P.poolRadius*.68,10);

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a1020"><title>罗盘学习 · 易术堂</title><link rel="icon" href="../icon192.png"><link rel="stylesheet" href="style.css">
-<script defer src="../guard.js"></script><script defer src="../reader.js"></script><script defer src="../notes.js"></script><script defer src="data.js"></script><script defer src="model.js"></script><script defer src="plate-data.js"></script><script defer src="dial.js"></script><script defer src="guides.js"></script><script defer src="app.js"></script></head>
+<script defer src="../guard.js"></script><script defer src="../reader.js"></script><script defer src="../notes.js"></script><script defer src="data.js"></script><script defer src="model.js"></script><script defer src="plate-data.js"></script><script defer src="dial.js"></script><script defer src="degree-memory.js"></script><script defer src="guides.js"></script><script defer src="app.js"></script></head>
 <body><header class="topbar"><a class="brand" href="#explore"><span class="brand-mark">盘</span><span>罗盘学习<small>认位置 · 读罗层 · 练坐向</small></span></a><div class="top-actions"><button class="quiet" data-act="settings">显示设置</button><a href="../index.html" target="_top">易术堂</a></div></header>
 <main><section id="explore-view" class="view">
 <div class="intro"><div><p class="kicker">罗盘研习室</p><h1>二十九层综合盘</h1></div><button class="button primary" data-act="daily">今日八题</button></div>
@@ -13,6 +13,7 @@
 <p class="gesture-help">单指旋转 · 双指移动与缩放 · 长按选层</p>
 <div class="angle-control"><label for="bearing-number">前方度数</label><div><button class="square" data-step="-1" aria-label="减少一度">−1°</button><input id="bearing-number" type="number" min="0" max="360" step="0.1" value="115.7" inputmode="decimal"><span>°</span><button class="square" data-step="1" aria-label="增加一度">＋1°</button></div><input id="bearing-range" type="range" min="0" max="359.9" step="0.1" value="115.7" aria-label="前方朝向度数"></div>
 <details class="mountain-shortcuts"><summary>二十四山快速定位</summary><div class="compass-jumps" id="mountain-jumps" aria-label="二十四山快速定位"></div></details>
+<details id="degree-memory" class="degree-memory"><summary>二十四山度数 · 快速记忆<small>用画面记数字，点开单字查看；也可直接转盘验证</small></summary><div id="degree-memory-body"></div></details>
 <p class="source-small plate-status">拖动研习盘，熟悉每圈的位置；先看度数，再读红线所压的格。</p>
 </section>
 <aside class="desktop-panel"><div id="inline-panel" class="learning-panel"><div class="panel-heading"><p class="kicker">沿红线读盘</p><h2>选一圈，慢慢看清</h2></div><div class="ring-picker" id="ring-picker"></div><article class="reading-card" id="reading-card" aria-live="polite"></article><div class="learning-actions"><button class="button" data-act="focus-layer">放大这圈</button><button class="button" data-act="layer-quiz">练这个知识点</button></div><div class="study-tip"><span>试着先回想</span><p>先报前方，再找对面。每天把一圈读熟，比随手转一转更容易记住。</p><a href="#learn">读盘入门</a></div></div></aside>

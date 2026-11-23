@@ -9,7 +9,7 @@ const lifecycle=async e=>{let p;handlers[e]({waitUntil:r=>p=r});await p};
 async function get(file){let p;handlers.fetch({request:{method:'GET',url:'https://example.test/all-project/'+file},respondWith:x=>p=x});return p}
 (async()=>{
  await lifecycle('install');
- for(const f of ['index.html','app.js','model.js','data.js','plate-data.js','dial.js','guides.js','style.css'])assert(cached.has('./luopan/'+f));
+ for(const f of ['index.html','app.js','model.js','data.js','plate-data.js','dial.js','guides.js','degree-memory.js','style.css'])assert(cached.has('./luopan/'+f));
  assert(!cached.has('./luopan/reference.js')&&!cached.has('./luopan/reference/wide.jpg'));
  console.log('✓ 离线预缓存矢量绘图脚本、样式与教学内容');
  assert(cached.has('./notes.js')&&cached.has('./reader.js')&&cached.has('./guard.js'));
