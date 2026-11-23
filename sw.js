@@ -1,7 +1,7 @@
-const CACHE = 'mingli-home-v47-luopan';
+const CACHE = 'mingli-home-v48-luopan-vector';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
-                './backup.html', './check.html', './guard.js', './notebook.html', './notes.js', './reader.js', './luopan/', './luopan/index.html', './luopan/style.css', './luopan/data.js', './luopan/model.js', './luopan/app.js', './luopan/reference.js', './luopan/reference/wide.jpg', './luopan/reference/detail.jpg'];
+                './backup.html', './check.html', './guard.js', './notebook.html', './notes.js', './reader.js', './luopan/', './luopan/index.html', './luopan/style.css', './luopan/data.js', './luopan/plate-data.js', './luopan/dial.js', './luopan/model.js', './luopan/app.js'];
 
 self.addEventListener('install', e => {
   // ⚠️ addAll 必须兜底：任何一个资源取不到都会让 install 失败，
