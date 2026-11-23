@@ -5,7 +5,7 @@ const dom=new JSDOM(html,{url:'https://example.test/all-project/luopan/',runScri
 const w=dom.window,$=s=>w.document.querySelector(s);
 const observers=[],NativeObserver=w.MutationObserver;w.MutationObserver=class extends NativeObserver{constructor(fn){super(fn);observers.push(this)}};
 w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=function(){};
-for(const f of ['data.js','model.js','plate-data.js','dial.js','app.js'])w.eval(fs.readFileSync('luopan/'+f,'utf8'));
+for(const f of ['data.js','model.js','plate-data.js','dial.js','guides.js','app.js'])w.eval(fs.readFileSync('luopan/'+f,'utf8'));
 assert(w.LuopanApp,'initialization');
 assert(!$('#compass-svg image')&&!$('canvas'),'the entire board must be SVG text and geometry');
 assert(!html.includes('reference.js'),'no screenshot compositor');
@@ -18,7 +18,7 @@ for(let n=0;n<30;n++)$('[data-act="zoom-in"]').click();
 assert.equal($('#zoom-value').value,'12×');
 assert.equal($('#compass-stage').dataset.renderMode,'detail');
 assert($('#compass-svg .viewport').getAttribute('transform').includes('scale(12)'),'zoom must be applied to SVG geometry, not a compositor bitmap');
-assert.equal($('#dial-viewport').style.transform,'none');assert.equal($('#dial-rotor').style.transform,'none');
+assert.equal($('#dial-viewport').style.transform,'translate3d(0%, 0%, 0px)');assert.equal($('#dial-rotor').style.transform,'none');
 w.LuopanApp.setDegree(120);assert.equal($('#compass-svg .disc').getAttribute('transform'),'rotate(-120)');
 assert($('#compass-svg .viewport').getAttribute('transform').includes('scale(12)'),'rotation must preserve vector magnification');
 assert(!$('#compass-svg image'),'zoom must not switch to an image');
@@ -40,7 +40,7 @@ w.cancelAnimationFrame=id=>queued.delete(id);
 const flush=()=>{const f=[...queued.values()];queued.clear();f.forEach(fn=>fn())};
 const stage=$('#compass-stage');stage.getBoundingClientRect=()=>({left:0,top:0,width:400,height:400});
 const pointer=(type,id,x,y)=>{const e=new w.Event(type,{bubbles:true,cancelable:true});Object.assign(e,{pointerId:id,clientX:x,clientY:y,button:0});stage.dispatchEvent(e)};
-const viewport=()=>$('#compass-stage').dataset.renderMode==='detail'?$('#compass-svg .viewport').getAttribute('transform'):$('#dial-viewport').style.transform;
+const viewport=()=>JSON.stringify([$('#dial-viewport').style.transform,$('#compass-svg .viewport').getAttribute('transform')]);
 w.LuopanApp.setDegree(0);
 const bandGlyph=$('.original-band svg text'),card=$('#reading-card').innerHTML,vectorContents=$('#compass-svg').innerHTML;
 pointer('pointerdown',1,200,60);
@@ -86,7 +86,7 @@ const reload=new JSDOM(html,{url:'https://example.test/all-project/luopan/',runS
 const rw=reload.window;rw.scrollTo=()=>{};rw.HTMLElement.prototype.scrollIntoView=function(){};
 const reloadObservers=[],ReloadObserver=rw.MutationObserver;rw.MutationObserver=class extends ReloadObserver{constructor(fn){super(fn);reloadObservers.push(this)}};
 rw.localStorage.setItem(w.LuopanModel.KEY,JSON.stringify(saved));
-for(const f of ['data.js','model.js','plate-data.js','dial.js','app.js'])rw.eval(fs.readFileSync('luopan/'+f,'utf8'));
+for(const f of ['data.js','model.js','plate-data.js','dial.js','guides.js','app.js'])rw.eval(fs.readFileSync('luopan/'+f,'utf8'));
 assert.equal(rw.document.querySelector('#compass-svg [data-layer="di"]').style.display,'none','reload restores hidden rings');
 assert(!rw.document.querySelector('[data-ring-visible="pool"]').checked,'reload restores checkbox state');
 reloadObservers.forEach(o=>o.disconnect());reload.window.close();
@@ -98,6 +98,21 @@ $('[data-visible-preset="none"]').click();assert(toggles.every(el=>!el.checked))
 $('[data-visible-preset="basic"]').click();assert.deepEqual(toggles.filter(el=>el.checked).map(el=>el.dataset.ringVisible).sort(),['degree','di','pool','ren','tian'].sort());
 $('[data-visible-preset="all"]').click();assert(toggles.every(el=>el.checked));
 assert.equal($('#visibility-count').textContent,'已显示 28 / 28 层');
+for(const l of w.LuopanApp.L){assert(w.LUOPAN_GUIDES[l.id],l.id+' guide');w.LuopanApp.selectLayer(l.id);assert.equal($('.ring-guide').dataset.guide,l.id);assert.equal($('.ring-guide').querySelectorAll('p.layer-note').length,4)}
+w.LuopanApp.selectLayer('pool');assert($('.original-band svg path'),'pool illustration');
+w.LuopanApp.selectLayer('jade');assert($('#reading-card').textContent.includes('格界红点'));
+const dots=[...w.document.querySelectorAll('#compass-svg [data-layer="jade"] [data-cell]')];
+const jade=w.LuopanApp.L.find(l=>l.id==='jade');
+for(const [i,g] of dots.entries()){const c=jade.cells[i],circles=g.querySelectorAll('circle');assert.equal(circles.length,c.label==='0'?0:1,'position code must not be a point count');if(c.label==='2'){const a=(c.start+c.width)*Math.PI/180,r=(jade.r0+jade.r1)/2;assert(Math.abs(+circles[0].getAttribute('cx')-r*Math.sin(a))<.000001);assert.equal(circles[0].dataset.dotPosition,'boundary')}}
+assert.equal(dots.reduce((n,g)=>n+g.querySelectorAll('circle').length,0),160);
+$('[data-act="reset-pan"]').click();$('[data-act="focus-layer"]').click();
+const beforePan=$('#compass-svg .viewport').getAttribute('transform'),beforeSurface=$('#dial-viewport').style.transform;
+pointer('pointerdown',1,150,200);pointer('pointerdown',2,250,200);pointer('pointermove',1,165,215);pointer('pointermove',2,265,215);flush();
+assert.equal($('#compass-svg .viewport').getAttribute('transform'),beforePan,'short pan reuses the final-resolution vector surface');assert.notEqual($('#dial-viewport').style.transform,beforeSurface);
+assert($('#compass-overlay .crosshair').getAttribute('transform').includes('scale(2.5)'),'reading lines scale with the disk');
+pointer('pointerup',1,165,215);pointer('pointerup',2,265,215);
+console.log('✓ 32项讲解、天池入口、384格单点/界线点语义，以及双指平移复用清晰图层通过');
+
 $('[data-act="close-drawers"]').click();assert($('#visibility-drawer').hidden);
 console.log('✓ 天池及27圈可逐项显隐、批量切换、即时保存，选层自动显示且不影响其他圈');
 Object.defineProperty(w,'innerWidth',{value:390,writable:true});

@@ -37,3 +37,14 @@
 /* Zoom inside the SVG viewport; disable texture promotion for magnified text. */
 #compass-stage[data-render-mode="detail"] #dial-viewport,
 #compass-stage[data-render-mode="detail"] #dial-rotor{will-change:auto;backface-visibility:visible;contain:none;transform:none}
+
+/* A bounded 3-window SVG surface preserves final-scale pixels while panning. */
+.visibility-row{align-items:start;flex-wrap:wrap}.visibility-row>label{display:flex;gap:10px;align-items:center;flex:1 1 120px;min-width:0;cursor:pointer}.visibility-row>button{margin-left:auto;padding:4px 8px;font-size:12px}
+.ring-guide{border-top:1px solid var(--line);padding-top:16px;margin-top:18px}.ring-guide h4{font-size:16px;margin:0 0 12px;color:var(--gold);font-weight:500}.ring-guide>div{margin:12px 0}.ring-guide b{font-size:13px;color:var(--accent);font-weight:500}.ring-guide p.layer-note{font-size:14px;margin:4px 0 0;line-height:1.85}
+.dial-heading{flex-wrap:wrap}.dial-heading>span{flex:1 1 130px}
+
+#compass-stage[data-render-mode="detail"] #dial-viewport{left:-100%;top:-100%;right:auto;bottom:auto;width:300%;height:300%;contain:layout paint;will-change:transform}
+#compass-stage[data-render-mode="detail"] #compass-svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden}
+#compass-svg .ring{isolation:auto}
+
+.plate-audit{margin-top:20px;border-top:1px solid var(--line);padding-top:14px;font-size:14px}.plate-audit summary{cursor:pointer;color:var(--gold)}.plate-audit p{font-size:13px;line-height:1.85;color:var(--muted);margin:10px 0}

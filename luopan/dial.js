@@ -40,8 +40,10 @@ if(kind==='degree'){
  return g+text(c.label,d,l.r0+h*.37,h*.44);
 }
 if(kind==='dots'){
- const n=+c.label,dot=Math.min(w*.37,h*.32);
- for(let j=0;j<n;j++){const p=polar(r,c.start+c.width*(n===2?(j===0?.3:.7):.5));g+=`<circle cx="${p[0]}" cy="${p[1]}" r="${dot*.7}" fill="${RED}"/>`}
+ const marker=+c.label,dot=Math.min(w*.37,h*.32);
+ // 2 is an offset marker, not a count: exactly one dot on the next boundary.
+ if(marker){const p=polar(r,c.start+c.width*(marker===2?1:.5));g+=`<circle cx="${p[0]}" cy="${p[1]}" r="${dot*.7}" fill="${RED}" data-dot-position="${marker===2?'boundary':'center'}"/>`}
+
  return g;
 }
 if(kind==='marks'){
@@ -64,7 +66,7 @@ return s;
 }
 function render({focus=null,dim=false}={}){
  const id=focus,ls=id?P.layers.filter(l=>l.id===id):P.layers;
- return (!id?'<circle r="581" fill="#f5e68e" stroke="#17170f" stroke-width="1.5"/>':'')+ls.map(l=>`<g opacity="${dim&&id&&l.id!==id?.15:1}">${ring(l)}</g>`).join('')+(!id?`<g data-layer="pool">${pool()}</g>`:'');
+ return (!id?'<circle r="581" fill="#f5e68e" stroke="#17170f" stroke-width="1.5"/>':'')+ls.map(l=>`<g opacity="${dim&&id&&l.id!==id?.15:1}">${ring(l)}</g>`).join('')+(!id?`<g data-layer="pool"><g data-ring="pool">${pool()}</g></g>`:'');
 }
 root.LuopanDial={render,ring,layers:P.layers,pool,polar,esc};
 })(window);
