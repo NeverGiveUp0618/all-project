@@ -1,4 +1,4 @@
-const CACHE = 'mingli-home-v57-mangpai-qbank';
+const CACHE = 'mingli-home-v58-mangpai-clean';
 const ASSETS = ['./', './index.html', './view.html', './manifest.json',
                 './icon180.png', './icon192.png', './icon512.png',
                 './backup.html', './check.html', './guard.js', './notebook.html', './notes.js', './reader.js', './luopan/', './luopan/index.html', './luopan/style.css', './luopan/data.js', './luopan/plate-data.js', './luopan/dial.js', './luopan/model.js', './luopan/degree-memory.js', './luopan/guides.js', './luopan/app.js'];
