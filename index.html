@@ -277,7 +277,7 @@
 
       <a class="card" data-app="mangpai" href="view.html?app=mangpai">
         <div class="ic">盲</div>
-        <div class="txt"><div class="t-main">盲派八字</div><div class="t-sub"><span class="summary-item">78讲教材</span> · <span class="summary-item">19课初级白话</span> · <span class="summary-item">864道章末题</span></div>
+        <div class="txt"><div class="t-main">盲派八字</div><div class="t-sub"><span class="summary-item">78讲教材</span> · <span class="summary-item">78课白话</span> · <span class="summary-item">2716道章节题</span></div>
           <div class="badge"></div></div>
         <span class="no">壹</span><span class="arrow">&#8250;</span>
       </a>
@@ -385,7 +385,7 @@
 })();
 
 /* SITE_COUNTS_START */
-window.YST_COUNTS={"mangpai":{"plain":19,"qna":11,"selftest":864,"course":78,"rawCourse":85,"notes":19,"quiz":936,"quizChart":936,"quizChai":936},"jingjiang":{"course":16,"notes":24,"quiz":812,"quizChart":780,"quizChai":522},"lrcourse":{"lesson":25,"basicLesson":20,"planned":25,"pan":10,"basicPan":14,"cite":407,"ref":160,"basicRef":266,"ge":66,"extra":5,"xf":295,"bifa":100,"bifage":356,"jinsuo":94,"jinsuob":41,"quiz":189,"quizstar":81,"mufu":80,"tongjie":842},"zeri":{"questions":1413,"chapters":72,"terms":452,"termQuestions":446}};
+window.YST_COUNTS={"mangpai":{"plain":78,"qna":11,"selftest":2716,"course":78,"rawCourse":85,"notes":19,"quiz":936,"quizChart":936,"quizChai":936},"jingjiang":{"course":16,"notes":24,"quiz":812,"quizChart":780,"quizChai":522},"lrcourse":{"lesson":25,"basicLesson":20,"planned":25,"pan":10,"basicPan":14,"cite":407,"ref":160,"basicRef":266,"ge":66,"extra":5,"xf":295,"bifa":100,"bifage":356,"jinsuo":94,"jinsuob":41,"quiz":189,"quizstar":81,"mufu":80,"tongjie":842},"zeri":{"questions":1413,"chapters":72,"terms":452,"termQuestions":446}};
 /* SITE_COUNTS_END */
 
 // —— 学习看板 + 继续上次 + 按使用频率排序 ——
@@ -474,15 +474,20 @@ window.YST_COUNTS={"mangpai":{"plain":19,"qna":11,"selftest":864,"course":78,"ra
       if(m) p.push('知识点 <b>'+m+'</b> 条');
       return p.length ? p.join(' · ') : null;
     },
-    // 盲派八字(mangpai-course):mp_course_read {id:百分比} / mp_course_seen；分母读 mp_course_counts
+    // 盲派八字(mangpai-course):mp_course_read {id:百分比} / mp_course_seen / mp_course_st_seen / mp_course_wrong
     mangpai:function(){
       var r=J('mp_course_read',{}),ch=0,nt=0,plain=0;
-      for(var k in r){ if((+r[k]||0)<90) continue; if(k.charAt(0)==='c') ch++; else if(k.charAt(0)==='n') nt++; else if(/^bh\d+$/.test(k)) plain++; }
+      for(var k in r){ if((+r[k]||0)<90) continue; if(k.charAt(0)==='c') ch++; else if(k.charAt(0)==='n') nt++; else if(/^bh(z|g|zt)?\d+$/.test(k)) plain++; }
       var seen=Object.keys(J('mp_course_seen',{})).length, c=J('mp_course_counts',{}), p=[];
+      var sts=J('mp_course_st_seen',{}), stk=Object.keys(sts), stOk=0;
+      stk.forEach(function(k){ if(sts[k]&&sts[k][1]) stOk++; });
+      var wn=Object.keys(J('mp_course_wrong',{})).length;
       if(ch) p.push('读完 <b>'+ch+'</b>/'+total('mangpai','course',c.course)+' 讲');
       if(nt) p.push('专题 <b>'+nt+'</b>/'+total('mangpai','notes',c.notes)+' 篇');
       if(plain) p.push('白话 <b>'+plain+'</b>/'+total('mangpai','plain',c.plain)+' 课');
+      if(stk.length) p.push('章节题 <b>'+stk.length+'</b>/'+total('mangpai','selftest',c.selftest)+'（'+Math.round(stOk/stk.length*100)+'%）');
       if(seen) p.push('命例 <b>'+seen+'</b>/'+total('mangpai','quiz',c.quiz)+' 题');
+      if(wn) p.push('错题 <b>'+wn+'</b>');
       return p.length ? p.join(' · ') : null;
     },
     // 象义:键名动态(前缀 bazi_xiangyi_mobile_v2__),只能确认有无记录

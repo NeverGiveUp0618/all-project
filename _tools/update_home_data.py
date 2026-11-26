@@ -12,7 +12,7 @@ def build():
  bank=read_json(PROJECTS/'zeri-web/question-bank/questions.json');terms=read_json(PROJECTS/'zeri-web/question-bank/glossary/terms.json');tq=read_json(PROJECTS/'zeri-web/question-bank/glossary/questions.json')
  counts['zeri']={'questions':len(bank),'chapters':len({q['chapter'] for q in bank}),'terms':len(terms),'termQuestions':len(tq)}
  m,j,l,z=(counts[k] for k in ['mangpai','jingjiang','lrcourse','zeri'])
- labels={'mangpai':f"{m['course']}讲教材 · {m['plain']}课初级白话 · {m['selftest']}道章末题",'zeri':f"{z['questions']}道教材题 · {z['terms']}个名词 · {z['termQuestions']}道名词题",'jingjiang':f"{j['course']}章教材 · {j['notes']}篇笔记 · {j['quiz']}道命例题",'lrcourse':f"通解{l['lesson']}课 · 初中级{l['basicLesson']}课 · {l['ref']+l['basicRef']}条速查",'bazi':'教材知识点 · 断盘陪练 · 错题复习','xiangfa':'断事图 · 八字与六壬 · 共象速查'}
+ labels={'mangpai':f"{m['course']}讲教材 · {m['plain']}课白话 · {m['selftest']}道章节题",'zeri':f"{z['questions']}道教材题 · {z['terms']}个名词 · {z['termQuestions']}道名词题",'jingjiang':f"{j['course']}章教材 · {j['notes']}篇笔记 · {j['quiz']}道命例题",'lrcourse':f"通解{l['lesson']}课 · 初中级{l['basicLesson']}课 · {l['ref']+l['basicRef']}条速查",'bazi':'教材知识点 · 断盘陪练 · 错题复习','xiangfa':'断事图 · 八字与六壬 · 共象速查'}
  p=ROOT/'index.html';s=p.read_text()
  for key,label in labels.items():
   pat=r'(<a class="card" data-app="'+key+r'"[\s\S]*?<div class="t-sub">)[\s\S]*?(</div>)'
