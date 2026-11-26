@@ -15,9 +15,13 @@ function load(pre) {
   ok(!!$('#ygReaderBtn'), '页面出现「Aa」按钮');
   $('#ygReaderBtn').click();
   ok($('#ygReaderPop').style.display === 'block', '点按钮弹出设置面板');
-  $('#ygZp').click();
-  ok(D.documentElement.getAttribute('data-yg-zoom') === '110', '字号 +：zoom=1.1');
-  ok(JSON.parse(w.localStorage.getItem('yg_reader')).z === 110, '设置写入 yg_reader（同域各站共享）');
+  const slider=$('#ygFontRange');
+  ok(slider.type==='range' && slider.min==='90' && slider.max==='150' && slider.step==='1' && !$('#ygZp') && !$('#ygZm'), '字号改为90—150%连续滑块，移除加减按钮');
+  slider.value='123';slider.dispatchEvent(new w.Event('input',{bubbles:true}));
+  ok(D.documentElement.getAttribute('data-yg-zoom') === '123' && $('#ygZv').textContent==='123%', '拖动实时缩放并更新百分比');
+  ok($('#ygFontRange')===slider && $('#ygReaderPop').style.display==='block', '拖动不重建滑块、不关闭面板');
+  ok(Math.abs(parseFloat($('#ygReaderPop').style.zoom)*1.23-1)<.001, '缩放控件反向补偿，拖动位置保持稳定');
+  ok(JSON.parse(w.localStorage.getItem('yg_reader')).z === 123, '设置写入 yg_reader（同域各站共享）');
   D.querySelector('[data-l="2"]').click();
   ok(/1\.95/.test((D.getElementById('yg-reader-css') || {}).textContent || ''), '行距「宽松」注入样式 1.95');
   ok(!/\.doc \*/.test(D.getElementById('yg-reader-css').textContent), '行距样式不碰 .doc * （避免撑坏命盘色牌）');
@@ -25,6 +29,9 @@ function load(pre) {
   ok(D.documentElement.getAttribute('data-yg-zoom') === '100' && !D.getElementById('yg-reader-css'), '恢复默认后无 zoom、无注入样式');
   w = load('{"z":135,"l":1}');
   ok(w.document.documentElement.getAttribute('data-yg-zoom') === '135' && !!w.document.getElementById('yg-reader-css'), '刷新后读取已存设置并生效');
+  w = load('{"z":127,"l":0}');
+  w.document.getElementById('ygReaderBtn').click();
+  ok(w.document.getElementById('ygFontRange').value==='127', '任意连续字号刷新后保留，不退回旧固定档');
   w = load('{"z":77,"l":9}');
   ok(w.document.documentElement.getAttribute('data-yg-zoom') === '100', '异常值回退默认');
   console.log(`\n${pass} 通过，${fail} 失败`);
